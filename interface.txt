@@ -1,0 +1,42 @@
+!!! 
+	Client: Contact{ Name, Uuid }
+	Server: Contact{ Name, Uuid } && Client{ Thread, Uuid }
+
+	-------------------------------------------------------
+
+	ComData{ Command, UUID, Object } --> ComData{ Command, Object }
+!!!
+
+
+Refresh contacts:
+	input -- ComData{ command=RefreshContacts, data=null }
+	output -- ResData{ resultType=UpdatedContacts, data=List<Contact> }
+
+Create conference:
+	input -- ComData{ command=CreateConference, data=List<Contact> }
+	output -- ResData{ resultType=CreatedConference, data=Conference }
+
+Add to conference:
+	input -- ComData{ command=AddToConference, data=Contact }
+	output -- 1. ResData{ resultType=Added, data=bool }
+			  2. ResData{ resultType=AddedConference, data=Conference }
+
+Remove from conference:
+	input -- ComData{ command=RemoveFromConference, data={ Conference, Contact } }
+	output -- 1. ResData{ resultType=Removed, data=bool }
+			  2. ResData{ resultType=RemovedConference, data=Conference }
+
+Delete conference:
+	input -- ComData{ command=DeleteConference, data=Conference }
+	output -- 1. ResData{ resultType=DeletedConference, data=bool }
+			  2. ResData{ resultType=DeletedConference, data=Conference }
+
+Send message to contact
+	input -- ComData{ command=SendMessageToContact, data={ Contact (dest), Message } }
+	output -- ResData{ command=Message, data={ Contact (source), Message } }
+
+Send message to conference (Проверка на отправку в конференцию, в которой не состоишь?)
+	input -- ComData{ command=SendMessageToConference, data={ Conference (dest), Message } }
+	output -- ResData={ resultType=Message, data={ Conference (dest), Message } }
+
+
