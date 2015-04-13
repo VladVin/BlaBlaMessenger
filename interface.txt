@@ -18,8 +18,9 @@ Create conference:
 
 Add to conference:
 	input -- ComData{ command=AddToConference, data=Contact }
-	output -- 1. ResData{ resultType=Added, data=bool }
-              2. ResData{ resultType=AddedConference, data=Conference }
+	output -- 
+		1. ResData{ resultType=Added, data=bool }          
+    	2. ResData{ resultType=AddedConference, data=Conference }
 
 Remove from conference:
 	input -- ComData{ command=RemoveFromConference, data={ Conference, Contact } }
