@@ -24,13 +24,15 @@ Add to conference:
 
 Remove from conference:
 	input -- ComData{ command=RemoveFromConference, data={ Conference, Contact } }
-	output -- 1. ResData{ resultType=Removed, data=bool }
-	2. ResData{ resultType=RemovedConference, data=Conference }
+	output -- 
+		1. ResData{ resultType=Removed, data=bool }
+		2. ResData{ resultType=RemovedConference, data=Conference }
 
 Delete conference:
 	input -- ComData{ command=DeleteConference, data=Conference }
-	output -- 1. ResData{ resultType=DeletedConference, data=bool }
-			  2. ResData{ resultType=DeletedConference, data=Conference }
+	output -- 
+		1. ResData{ resultType=DeletedConference, data=bool }
+		2. ResData{ resultType=DeletedConference, data=Conference }
 
 Send message to contact
 	input -- ComData{ command=SendMessageToContact, data={ Contact (dest), Message } }
