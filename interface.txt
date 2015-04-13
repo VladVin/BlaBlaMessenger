@@ -34,11 +34,11 @@ Delete conference:
 		1. ResData{ resultType=DeletedConference, data=bool }
 		2. ResData{ resultType=DeletedConference, data=Conference }
 
-Send message to contact
+Send message to contact:
 	input -- ComData{ command=SendMessageToContact, data={ Contact (dest), Message } }
 	output -- ResData{ command=Message, data={ Contact (source), Message } }
 
-Send message to conference (Проверка на отправку в конференцию, в которой не состоишь?)
+Send message to conference: (Проверка на отправку в конференцию, в которой не состоишь?)
 	input -- ComData{ command=SendMessageToConference, data={ Conference (dest), Message } }
 	output -- ResData={ resultType=Message, data={ Conference (dest), Message } }
 
