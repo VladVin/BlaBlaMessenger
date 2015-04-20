@@ -1,6 +1,6 @@
-enum Commands { RefreshContacts, CreateConference, AddToConference, RemoveFromConference, DeleteConference, SendMessageToClient, SendMessageToConf, AddFileToStorage, RemoveFileFromStorage, RefreshStorage }
+enum Commands { RefreshContacts, CreateConference, AddToConference, RemoveFromConference, DeleteConference, SendMessageToContact, SendMessageToConference, RefreshStorage, UploadFileToStorage, DownloadFileFromStorage, RemoveFileFromStorage }
 
-enum ResultTypes { UpdatedContacts, CreatedConferenceID, Added | AddedConference, Removed | RemovedConferenceID, DeletedConference | DeletedConferenceID, Message, AddedFile, RemovedFile, UpdatedFiles }
+enum ResultTypes { UpdatedContacts, CreatedConferenceID | AddedToConference, AddedToConference | AddedConference, Removed | RemovedFromConferenceID, DeletedConference | DeletedConferenceID, Message, UpdatedFiles, UploadedFileToStorage, DownloadedFileFromStorage, RemovedFile }
 
 class ComData
 {
@@ -20,16 +20,27 @@ Contact {
     Uuid;
 }
 
-Message
+ContactConfPair {
+    UUID confID;
+    UUID contactID
+}
+
+UuidMessagePair
 {
-    String text;
-    UUID ID;
+    UUID id;
+    String message;
 }
 
 File
 {
     String name;
     Object data;
+}
+
+UuidFileNamePair
+{
+    String name;
+    UUID id;
 }
 
 List<Contact> contacts;

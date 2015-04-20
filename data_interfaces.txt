@@ -1,0 +1,69 @@
+!!! 
+    Client: Contact{ Name, Uuid }
+    Server: Contact{ Name, Uuid } && Client{ Thread, Uuid }
+
+    -------------------------------------------------------
+
+    ComData{ Command, UUID, Object } --> ComData{ Command, Object }
+!!!
+
+
+Refresh contacts:
+    input -- ComData{ command=RefreshContacts, uuid=null, data=null }
+    output -- ResData{ resultType=UpdatedContacts, data=List<Contact> }
+
+Create conference:
+    input -- ComData{ command=CreateConference, uuid=null, data=Conference={
+            name="Name";
+            confID=null;
+            contactsID=List<Contact>;
+        }
+    }
+    output -- 1) ResData{ resultType=CreatedConferenceID, data=uuid (maybe null) }
+              2) ResData{ resultType=AddedToConference, data=Conference}
+
+Add to conference:
+    input -- ComData{ command=AddToConference, uuid=null,data=ContactConfPair }
+    output -- 
+        1. ResData{ resultType=AddedToConferece, data=bool }
+        2. ResData{ resultType=AddedConference, data=Conference (full with me) }
+
+Remove from conference:
+    input -- ComData{ command=RemoveFromConference, uuid=null, data=ContactConfPair }
+    output -- 
+        1. ResData{ resultType=Removed, data=bool }
+        2. ResData{ resultType=RemovedFromConferenceID, data=uuid (confID) }
+
+Delete conference:
+    input -- ComData{ command=DeleteConference, uuid=UUID of conf,data=null }
+    output -- 
+        1. ResData{ resultType=DeletedConference, data=bool }
+        2. ResData{ resultType=DeletedConferenceID, data=UUID of conf }
+
+Send message to contact:
+    input -- ComData{ command=SendMessageToContact, uuid=UUID of contact; data=String(message) }
+    output -- ResData{ command=Message, data=UuidMessagePair }
+
+Send message to conference: (Проверка на отправку в конференцию, в которой не состоишь? - Не надо!)
+    input -- ComData{ command=SendMessageToConference, uuid=UUID of conf, data=String(message) }
+    output -- Broadcast -> ResData={ resultType=Message, data=UuidMessagePair }
+
+Refresh files:
+    input -- ComData{ command=RefreshStorage, uuid=null, data=null}
+    output -- ResData{ resultType=UpdatedFiles, data=List<UuidFileNamePair>}
+
+Upload file to the storage:
+    input -- ComData{ command=UploadFileToStorage, uuid=null, data=File={
+            name="Name with extension";
+            data=array of bytes of the file;
+        }
+    }
+    output -- ResData{ resultType=UploadedFileToStorage, data=bool}
+
+Download File from the Storage:
+    input -- ComData{ command=DownloadFileToStorage, uuid=UUID of the file, data=null}
+    output -- ResData{ resultType=DownloadedFileFromStorage, data=array of bytes}
+
+Remove file from the storage:
+    input -- ComData{ command=RemoveFileFromStorage, uuid=UUID of the file, data=null}
+    output -- ResData{resultType=RemovedFileFromStorage, data=bool}
