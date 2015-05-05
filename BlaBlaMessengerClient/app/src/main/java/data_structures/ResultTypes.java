@@ -3,13 +3,11 @@
  */
 public enum ResultTypes {
     UpdatedContacts,
-    CreatedConferenceID,
+    CreatedConference,
     AddedToConference,
     AddedConference,
-    Removed,
-    RemovedFromConferenceID,
+    RemovedFromConference,
     DeletedConference,
-    DeletedConferenceID,
     Message,
     UpdatedFiles,
     UploadedFileToStorage,

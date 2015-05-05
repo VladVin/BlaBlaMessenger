@@ -1,6 +1,6 @@
 enum Commands { RefreshContacts, CreateConference, AddToConference, RemoveFromConference, DeleteConference, SendMessageToContact, SendMessageToConference, RefreshStorage, UploadFileToStorage, DownloadFileFromStorage, RemoveFileFromStorage }
 
-enum ResultTypes { UpdatedContacts, CreatedConferenceID | AddedToConference, AddedToConference | AddedConference, Removed | RemovedFromConferenceID, DeletedConference | DeletedConferenceID, Message, UpdatedFiles, UploadedFileToStorage, DownloadedFileFromStorage, RemovedFile }
+enum ResultTypes { UpdatedContacts, CreatedConference, AddedToConference | AddedConference, RemovedFromConference, DeletedConference | DeletedConference, Message, UpdatedFiles, UploadedFileToStorage, DownloadedFileFromStorage, RemovedFile }
 
 class ComData
 {
