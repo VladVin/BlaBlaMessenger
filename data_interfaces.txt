@@ -8,6 +8,10 @@
 !!!
 
 
+Disconnect:
+	input -- ComData{ command=Disconnect, uuid=null, data=null }
+	output -- null
+
 Refresh contacts:
     input -- ComData{ command=RefreshContacts, uuid=null, data=null }
     output -- ResData{ resultType=UpdatedContacts, data=List<Contact> }

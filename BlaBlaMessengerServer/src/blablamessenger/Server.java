@@ -1,5 +1,7 @@
 package blablamessenger;
 
+import data_structures.CommandData;
+import data_structures.Commands;
 import data_structures.Conference;
 import data_structures.Contact;
 import java.io.IOException;
@@ -9,12 +11,16 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 public class Server extends Thread {
     final int port = 2671;
@@ -30,6 +36,7 @@ public class Server extends Thread {
             Logger.getLogger(Server.class.getName()).
                     log(Level.SEVERE, null, ex);
         }
+        CONNECTION_TIMEOUT = 5000;
     }
     
     public class ClientBase {
@@ -38,7 +45,7 @@ public class Server extends Thread {
         public void removeContact( Contact contact ) 
         { contacts.remove( contact ); }
         public List< Contact > getContacts()
-        { return contacts.subList( 0 ,  contacts.size() ); }
+        { return contacts; }
         
         public void addConference( UUID conferenceId, Conference conference )
         { conferences.put( conferenceId, conference ); }
@@ -59,7 +66,7 @@ public class Server extends Thread {
         private ConcurrentHashMap< UUID, Conference > conferences =
                 new ConcurrentHashMap();
         private ConcurrentHashMap< UUID, ClientReceiver > clients =
-                new ConcurrentHashMap();
+                new ConcurrentHashMap< UUID, ClientReceiver >();
     }
     
     @Override
@@ -67,10 +74,24 @@ public class Server extends Thread {
     {
         try {
             ServerSocket serverSocket = new ServerSocket( port, 0, ip );
-            while ( true ) {
+            serverSocket.setSoTimeout( CONNECTION_TIMEOUT );
+            
+            while ( !this.isInterrupted() ) {
                 Socket newClient = serverSocket.accept();
-                new ClientReceiver( clientBase, newClient ).start();
-            }     
+                new ClientReceiver( clientBase, newClient ).start();    
+            }
+            
+            clientBase.clients.entrySet().stream().forEach( 
+                    ( Entry<UUID, ClientReceiver> client ) -> {
+                try {
+                    client.getValue().addCommand( new CommandData( 
+                            Commands.RefreshContacts, null, null ) );
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Server.class.getName()).
+                            log(Level.SEVERE, null, ex);
+                }
+            });
+            
         } catch (IOException ex) {
             Logger.getLogger(Server.class.getName()).
                     log(Level.SEVERE, null, ex);
@@ -86,4 +107,6 @@ public class Server extends Thread {
     {
         System.out.println( log );
     }
+    
+    private final int CONNECTION_TIMEOUT;
 }

@@ -1,15 +1,15 @@
+package data_structures;
+
 /**
  * Created by VladVin on 25.04.2015.
  */
 public enum ResultTypes {
     UpdatedContacts,
-    CreatedConferenceID,
+    CreatedConference,
     AddedToConference,
     AddedConference,
-    Removed,
-    RemovedFromConferenceID,
+    RemovedFromConference,
     DeletedConference,
-    DeletedConferenceID,
     Message,
     UpdatedFiles,
     UploadedFileToStorage,
