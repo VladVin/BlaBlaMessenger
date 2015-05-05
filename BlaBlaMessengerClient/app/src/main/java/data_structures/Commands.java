@@ -2,6 +2,7 @@
  * Created by VladVin on 25.04.2015.
  */
 public enum Commands {
+    Disconnect,
     RefreshContacts,
     CreateConference,
     AddToConference,
