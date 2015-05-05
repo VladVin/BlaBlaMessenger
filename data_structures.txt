@@ -1,4 +1,4 @@
-enum Commands { RefreshContacts, CreateConference, AddToConference, RemoveFromConference, DeleteConference, SendMessageToContact, SendMessageToConference, RefreshStorage, UploadFileToStorage, DownloadFileFromStorage, RemoveFileFromStorage }
+enum Commands { Disconnect, RefreshContacts, CreateConference, AddToConference, RemoveFromConference, DeleteConference, SendMessageToContact, SendMessageToConference, RefreshStorage, UploadFileToStorage, DownloadFileFromStorage, RemoveFileFromStorage }
 
 enum ResultTypes { UpdatedContacts, CreatedConference, AddedToConference | AddedConference, RemovedFromConference, DeletedConference | DeletedConference, Message, UpdatedFiles, UploadedFileToStorage, DownloadedFileFromStorage, RemovedFile }
 
