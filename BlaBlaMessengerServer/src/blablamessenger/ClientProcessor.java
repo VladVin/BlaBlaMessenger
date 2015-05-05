@@ -43,17 +43,29 @@ public class ClientProcessor extends Thread {
         }
     }
     
-    public CommandData getCommand() throws InterruptedException
-    { return ( CommandData ) commands.take(); }
+    public CommandData getCommand()
+    {   
+        try {
+            return ( CommandData ) commands.take();
+        } catch ( InterruptedException ex ) {
+            Logger.getLogger(ClientProcessor.class.getName()).
+                    log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
     
     @Override
     public void run()
     {
-        
+        while ( true ) {
+            CommandData command = getCommand();
+            switch ( command.Command ) {
+                case Disconnect:
+                    
+                break;
+            }
+        }
     }    
-    
-    private void addConference( UUID newConference )
-    { myConferences.add( newConference ); }
     
     private LinkedBlockingQueue commands = new LinkedBlockingQueue();
     private ArrayList< UUID > myConferences = new ArrayList<>();
