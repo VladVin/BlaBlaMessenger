@@ -11,16 +11,13 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
 
 public class Server extends Thread {
     final int port = 2671;
@@ -66,7 +63,7 @@ public class Server extends Thread {
         private ConcurrentHashMap< UUID, Conference > conferences =
                 new ConcurrentHashMap();
         private ConcurrentHashMap< UUID, ClientReceiver > clients =
-                new ConcurrentHashMap< UUID, ClientReceiver >();
+                new ConcurrentHashMap<>();
     }
     
     @Override
