@@ -19,26 +19,24 @@ Create conference:
             contactsID=List<Contact>;
         }
     }
-    output -- 1) ResData{ resultType=CreatedConferenceID, data=uuid (maybe null) }
+    output -- 1) ResData{ resultType=CreatedConference, data=uuid (maybe null) }
               2) ResData{ resultType=AddedToConference, data=Conference}
 
 Add to conference:
     input -- ComData{ command=AddToConference, uuid=null,data=ContactConfPair }
     output -- 
-        1. ResData{ resultType=AddedToConferece, data=bool }
+        1. ResData{ resultType=AddedToConferece, data=ContactConfPair }
         2. ResData{ resultType=AddedConference, data=Conference (full with me) }
 
 Remove from conference:
     input -- ComData{ command=RemoveFromConference, uuid=null, data=ContactConfPair }
     output -- 
-        1. ResData{ resultType=Removed, data=bool }
-        2. ResData{ resultType=RemovedFromConferenceID, data=uuid (confID) }
+        1. ResData{ resultType=RemovedFromConference, data=ContactConfPair }
 
 Delete conference:
     input -- ComData{ command=DeleteConference, uuid=UUID of conf,data=null }
     output -- 
-        1. ResData{ resultType=DeletedConference, data=bool }
-        2. ResData{ resultType=DeletedConferenceID, data=UUID of conf }
+        1. ResData{ resultType=DeletedConference, data=UUID of conf }
 
 Send message to contact:
     input -- ComData{ command=SendMessageToContact, uuid=UUID of contact; data=String(message) }
