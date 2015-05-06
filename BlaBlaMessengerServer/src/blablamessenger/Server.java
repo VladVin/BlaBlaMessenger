@@ -11,14 +11,11 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
 
 public class Server extends Thread {
     final int port = 2671;
@@ -39,11 +36,11 @@ public class Server extends Thread {
     
     public class ClientBase {
         public void addContact( Contact contact ) 
-        { contacts.add( contact ); }
-        public void removeContact( Contact contact ) 
-        { contacts.remove( contact ); }
-        public List< Contact > getContacts()
-        { return contacts; }
+        { contacts.put( contact.Uuid, contact ); }
+        public void removeContact( UUID contactId ) 
+        { contacts.remove( contactId ); }
+        public ArrayList< Contact > getContacts()
+        { return ( ArrayList< Contact > ) contacts.elements(); }
         
         public void addConference( UUID conferenceId, Conference conference )
         { conferences.put( conferenceId, conference ); }
@@ -54,17 +51,17 @@ public class Server extends Thread {
         
         public void addClient( UUID clientId, ClientReceiver client )
         { clients.put( clientId, client ); }
-        public void removeClient( UUID clientId )
-        { clients.remove( clientId ); }
+        public ClientReceiver removeClient( UUID clientId )
+        { return clients.remove( clientId ); }
         public ClientReceiver getClient( UUID clientId )
         { return clients.get( clientId ); }
         
-        private List< Contact > contacts = 
-                Collections.synchronizedList( new ArrayList< Contact >() );
+        private ConcurrentHashMap< UUID, Contact > contacts = 
+                new ConcurrentHashMap();
         private ConcurrentHashMap< UUID, Conference > conferences =
                 new ConcurrentHashMap();
         private ConcurrentHashMap< UUID, ClientReceiver > clients =
-                new ConcurrentHashMap<>();
+                new ConcurrentHashMap();
     }
     
     public void release( ServerSocket socket )
@@ -86,7 +83,7 @@ public class Server extends Thread {
     @Override
     public void run()
     {
-        try ( ServerSocket serverSocket = new ServerSocket( port, 0, ip ) ) {
+        try ( ServerSocket serverSocket = new ServerSocket( port ) ) {
             serverSocket.setSoTimeout( CONNECTION_TIMEOUT );
             
             while ( !this.isInterrupted() ) {

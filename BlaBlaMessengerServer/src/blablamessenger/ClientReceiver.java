@@ -37,7 +37,7 @@ public class ClientReceiver extends Thread {
     {     
         try {
             input = new ObjectInputStream( socket.getInputStream() );
-            String clientName = (String) input.readObject();
+            String clientName = ( String ) input.readObject();
             
             new ClientProcessor( clientBase, socket, 
                     clientName, this, commands ).start();
@@ -61,8 +61,7 @@ public class ClientReceiver extends Thread {
         
         while ( !this.isInterrupted() ) {
             try {
-                CommandData command = ( CommandData ) input.readObject();
-                addCommand( command );
+                addCommand( ( CommandData ) input.readObject() );
             } catch (IOException | ClassNotFoundException ex) {
                 Logger.getLogger(ClientReceiver.class.getName()).
                         log(Level.SEVERE, null, ex);
