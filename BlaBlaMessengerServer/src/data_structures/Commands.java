@@ -1,6 +1,5 @@
-/**
- * Created by VladVin on 25.04.2015.
- */
+package data_structures;
+
 public enum Commands {
     Disconnect,
     RefreshContacts,
