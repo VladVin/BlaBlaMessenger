@@ -1,6 +1,7 @@
 package data_structures;
 
 public enum Commands {
+    RegisterClient,
     Disconnect,
     RefreshContacts,
     CreateConference,

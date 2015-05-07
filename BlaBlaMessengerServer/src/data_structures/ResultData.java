@@ -3,11 +3,12 @@ package data_structures;
 import java.io.Serializable;
 
 public class ResultData implements Serializable {
-    public ResultTypes ResultType;
+    public ResultTypes Type;
     public DataObject Data;
-
-    public ResultData( ResultTypes resultType, Contacts contacts ) {
-        ResultType = resultType;
-        Data = contacts;
+    
+    public ResultData( final ResultTypes type, final DataObject data )
+    {
+        Type = type;
+        Data = data;
     }
 }
