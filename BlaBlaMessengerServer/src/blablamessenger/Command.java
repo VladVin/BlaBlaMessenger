@@ -1,5 +1,8 @@
-package data_structures;
+package blablamessenger;
 
+import data_structures.CommandData;
+import data_structures.Commands;
+import data_structures.DataObject;
 import java.util.UUID;
 
 public class Command { 

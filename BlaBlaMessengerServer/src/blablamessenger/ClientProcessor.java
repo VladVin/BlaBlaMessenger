@@ -2,7 +2,6 @@ package blablamessenger;
 
 import blablamessenger.Server.ClientBase;
 
-import data_structures.Command;
 import data_structures.Conference;
 import data_structures.Contact;
 import data_structures.Contacts;

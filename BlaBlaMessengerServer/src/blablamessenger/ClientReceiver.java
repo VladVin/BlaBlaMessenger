@@ -2,8 +2,7 @@ package blablamessenger;
 
 import blablamessenger.Server.ClientBase;
 
-import data_structures.Command;
-import data_structures.Command.Sources;
+import blablamessenger.Command.Sources;
 import data_structures.CommandData;
 
 import java.io.IOException;
