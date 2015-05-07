@@ -3,10 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Gleb/Documents/NetBeansProjects/BlaBlaMessengerRepo/BlaBlaMessengerServer/src/data_structures/Contacts.java</file>
+            <file>file:/C:/Users/Gleb/Documents/NetBeansProjects/BlaBlaMessengerRepo/BlaBlaMessengerServer/src/data_structures/Command.java</file>
             <file>file:/C:/Users/Gleb/Documents/NetBeansProjects/BlaBlaMessengerRepo/BlaBlaMessengerServer/src/blablamessenger/ClientProcessor.java</file>
             <file>file:/C:/Users/Gleb/Documents/NetBeansProjects/BlaBlaMessengerRepo/BlaBlaMessengerServer/src/blablamessenger/Server.java</file>
             <file>file:/C:/Users/Gleb/Documents/NetBeansProjects/BlaBlaMessengerRepo/BlaBlaMessengerServer/src/blablamessenger/ClientReceiver.java</file>
+            <file>file:/C:/Users/Gleb/Documents/NetBeansProjects/BlaBlaMessengerRepo/BlaBlaMessengerServer/src/data_structures/CommandData.java</file>
         </group>
     </open-files>
 </project-private>

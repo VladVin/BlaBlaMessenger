@@ -1,18 +1,19 @@
 package blablamessenger;
 
 import blablamessenger.Server.ClientBase;
-import data_structures.CommandData;
+
 import data_structures.Conference;
 import data_structures.Contact;
 import data_structures.Contacts;
 import data_structures.ResultData;
 import data_structures.ResultTypes;
+
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.UUID;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,7 +28,7 @@ public class ClientProcessor extends Thread {
     
     
     public ClientProcessor( ClientBase base, Socket myClient, String name,
-            ClientReceiver receiver, LinkedBlockingQueue inputCommands )
+            ClientReceiver receiver, ConcurrentLinkedQueue inputCommands )
     {
         clientBase = base;
         socket = myClient;
@@ -37,40 +38,55 @@ public class ClientProcessor extends Thread {
             output = new ObjectOutputStream( socket.getOutputStream() );
             
             client = UUID.randomUUID();
+            addLog( ClientProcessor.class.getName() + 
+                    ": writing clients' uuid -- " +
+                    client.toString() );
             output.writeObject( client );
             output.flush();
+            addLog( ClientProcessor.class.getName() + 
+                    ": wrote client's uuid" );
             
             clientBase.addContact( new Contact( name, client ) );
             clientBase.addClient( client, receiver );
+            addLog( ClientProcessor.class.getName() + 
+                    ": added new contact and client to client's base" );
         } catch (IOException ex) {
             Logger.getLogger(ClientProcessor.class.getName()).
                     log(Level.SEVERE, null, ex);
         }
     }
     
-    public CommandData getCommand()
+    public Command getCommand()
     {   
-        try {
-            return ( CommandData ) commands.take();
-        } catch ( InterruptedException ex ) {
-            Logger.getLogger(ClientProcessor.class.getName()).
-                    log(Level.SEVERE, null, ex);
+        Command command = null;
+        while ( command == null ) {
+            command = commands.poll();
         }
-        return null;
+        return command;
     }
     
     @Override
     public void run()
     {
         while ( running ) {
-            CommandData command = getCommand();
+            addLog( ClientProcessor.class.getName() + 
+                    ": waiting for new command" );
+            Command command = getCommand();
             switch ( command.Command ) {
                 case Disconnect:
+                    addLog( ClientProcessor.class.getName() + 
+                            ": get disconnect command" );
                     disconnect();
                 break;
                 case RefreshContacts:
+                    addLog( ClientProcessor.class.getName() + 
+                            ": get refresh contacts command" );
                     refreshContacts();
-                break; 
+                break;
+                case AddToConference:
+                    addLog( ClientProcessor.class.getName() + 
+                            ": get add to conference command" );
+                break;
             }
         }
     }    
@@ -78,8 +94,7 @@ public class ClientProcessor extends Thread {
     private void disconnect()
     {
         clientBase.removeContact( client );
-        ClientReceiver receiver = clientBase.removeClient( client );
-        receiver.interrupt();
+        clientBase.removeClient( client );
         
         myConferences.stream().forEach( ( UUID conference ) -> {
             Conference myConference = clientBase.getConference( conference );
@@ -110,6 +125,25 @@ public class ClientProcessor extends Thread {
         writeResult( result );
     }
     
+    private void addToConference( Command command )
+    {
+        switch ( command.Source ) {
+            case Client:
+                
+            break;
+            case Server:
+                
+            break;
+            default:
+                
+            break;
+        }
+    }
+    private void notifyNewMemberConference()
+    {
+        
+    }
+    
     private void writeResult( ResultData result )
     {
         try {
@@ -121,6 +155,12 @@ public class ClientProcessor extends Thread {
         }        
     }
     
-    private LinkedBlockingQueue commands = new LinkedBlockingQueue();
+    private void addLog( String log )
+    {
+        System.out.println( log );
+    }
+    
+    private ConcurrentLinkedQueue< Command > commands = 
+            new ConcurrentLinkedQueue<>();
     private ArrayList< UUID > myConferences = new ArrayList<>();
 }
