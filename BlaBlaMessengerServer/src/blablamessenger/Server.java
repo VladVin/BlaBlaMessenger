@@ -58,6 +58,8 @@ public class Server extends Thread {
     
     public void release( ServerSocket socket )
     {
+        addLog( Server.class.getName() +
+                ": server shutting down" );
         try {
             socket.close();
         } catch (IOException ex) {
@@ -70,11 +72,16 @@ public class Server extends Thread {
             client.getValue().addCommand( new CommandData(
                     Commands.Disconnect, null, null ) );
         });
+        
+        addLog( Server.class.getName() +
+                ": server is off" );
     }
     
     @Override
     public void run()
     {
+        addLog( Server.class.getName() +
+                ": server started" );
         try ( ServerSocket serverSocket = new ServerSocket( port ) ) {
             serverSocket.setSoTimeout( CONNECTION_TIMEOUT );
             

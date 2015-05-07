@@ -59,8 +59,7 @@ public class ClientReceiver extends Thread {
             try {
                 addLog( ClientReceiver.class.getName() + 
                         ": waiting for new command" );
-                CommandData newCommand = ( CommandData ) input.readObject();
-                addCommand( newCommand );
+                addCommand( ( CommandData ) input.readObject() );
                 addLog( ClientReceiver.class.getName() + 
                         ": added new command" );
             } catch ( IOException | ClassNotFoundException ex ) {
