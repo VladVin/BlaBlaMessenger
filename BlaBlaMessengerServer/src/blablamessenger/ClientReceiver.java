@@ -1,12 +1,15 @@
 package blablamessenger;
 
 import blablamessenger.Server.ClientBase;
+
+import data_structures.Command;
+import data_structures.Command.Sources;
 import data_structures.CommandData;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
-import java.net.SocketException;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,29 +21,30 @@ public class ClientReceiver extends Thread {
     
     public void addCommand( CommandData command )
     {   
-        try {
-            commands.put( command );
-        } catch (InterruptedException ex) {
-            Logger.getLogger(ClientReceiver.class.getName()).
-                    log(Level.SEVERE, null, ex);
-        }
+        commands.add( new Command ( Sources.Client, command ) );
     }
 
     public ClientReceiver( ClientBase base, Socket newClient )
     {
         clientBase = base;
         socket = newClient;
-        READ_TIMEOUT = 50;
     }
     
     public void registrationNewClient()
     {     
         try {
+            addLog( ClientReceiver.class.getName() + 
+                    ": waiting for client's name" );
             input = new ObjectInputStream( socket.getInputStream() );
             String clientName = ( String ) input.readObject();
+            addLog( ClientReceiver.class.getName() + 
+                    ": get client's name -- " +
+                    clientName );
             
             new ClientProcessor( clientBase, socket, 
                     clientName, this, commands ).start();
+            addLog( ClientReceiver.class.getName() + 
+                    ": start new client processor" );
         } catch ( IOException | ClassNotFoundException ex ) {
             Logger.getLogger(ClientReceiver.class.getName()).
                     log(Level.SEVERE, null, ex);
@@ -52,21 +56,21 @@ public class ClientReceiver extends Thread {
     {   
         registrationNewClient();
         
-        try {
-            socket.setSoTimeout( READ_TIMEOUT );
-        } catch ( SocketException ex ) {
-            Logger.getLogger( ClientReceiver.class.getName() ).
-                    log(Level.SEVERE, null, ex);
+        while ( true ) {
+            try {
+                addLog( ClientReceiver.class.getName() + 
+                        ": waiting for new command" );
+                CommandData newCommand = ( CommandData ) input.readObject();
+                addCommand( newCommand );
+                addLog( ClientReceiver.class.getName() + 
+                        ": added new command" );
+            } catch ( IOException | ClassNotFoundException ex ) {
+                break;
+            } 
         }
         
-        while ( !this.isInterrupted() ) {
-            try {
-                addCommand( ( CommandData ) input.readObject() );
-            } catch (IOException | ClassNotFoundException ex) {
-                Logger.getLogger(ClientReceiver.class.getName()).
-                        log(Level.SEVERE, null, ex);
-            }
-        }
+        addLog( ClientReceiver.class.getName() + 
+                ": released" );
     }
     
     public void addLog( String log )
@@ -74,6 +78,6 @@ public class ClientReceiver extends Thread {
         System.out.println( log );
     }
         
-    private LinkedBlockingQueue commands = new LinkedBlockingQueue();
-    private final int READ_TIMEOUT;
+    private ConcurrentLinkedQueue< Command > commands = 
+            new ConcurrentLinkedQueue<>();
 }

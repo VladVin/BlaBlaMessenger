@@ -8,11 +8,19 @@ public class Command {
         Client
     }
     
-    Sources Source;
-    Commands Command;
-    UUID Uuid;
-    DataObject Data;
-
+    public Sources Source;
+    public Commands Command;
+    public UUID Uuid;
+    public DataObject Data;
+    
+    public Command( Sources src, 
+            Commands command, UUID id, DataObject data) 
+    {
+        Source = src;
+        Command = command;
+        Uuid = id;
+        Data = data;
+    }    
     public Command( Sources source, CommandData commandData ) {
         Source = source;
         Command = commandData.Command;
