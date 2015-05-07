@@ -1,4 +1,5 @@
-import java.io.Serializable;
+package data_structures;
+
 import java.util.UUID;
 
 /**

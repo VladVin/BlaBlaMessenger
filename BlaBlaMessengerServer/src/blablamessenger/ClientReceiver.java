@@ -16,25 +16,32 @@ public class ClientReceiver extends Thread {
     
     ObjectInputStream input;
     
-    public void addCommand( CommandData command ) throws InterruptedException
-    { commands.put( command ); }
+    public void addCommand( CommandData command )
+    {   
+        try {
+            commands.put( command );
+        } catch (InterruptedException ex) {
+            Logger.getLogger(ClientReceiver.class.getName()).
+                    log(Level.SEVERE, null, ex);
+        }
+    }
 
     public ClientReceiver( ClientBase base, Socket newClient )
     {
         clientBase = base;
         socket = newClient;
-        READ_TIMEOUT = 5000;
+        READ_TIMEOUT = 50;
     }
     
-    public void registrationNewClient() throws ClassNotFoundException
+    public void registrationNewClient()
     {     
         try {
             input = new ObjectInputStream( socket.getInputStream() );
-            String clientName = (String) input.readObject();
+            String clientName = ( String ) input.readObject();
             
             new ClientProcessor( clientBase, socket, 
                     clientName, this, commands ).start();
-        } catch ( IOException ex ) {
+        } catch ( IOException | ClassNotFoundException ex ) {
             Logger.getLogger(ClientReceiver.class.getName()).
                     log(Level.SEVERE, null, ex);
         }
@@ -43,12 +50,7 @@ public class ClientReceiver extends Thread {
     @Override
     public void run()
     {   
-        try {
-            registrationNewClient();
-        } catch ( ClassNotFoundException ex ) {
-            Logger.getLogger(ClientReceiver.class.getName()).
-                    log(Level.SEVERE, null, ex);
-        }
+        registrationNewClient();
         
         try {
             socket.setSoTimeout( READ_TIMEOUT );
@@ -58,7 +60,12 @@ public class ClientReceiver extends Thread {
         }
         
         while ( !this.isInterrupted() ) {
-            
+            try {
+                addCommand( ( CommandData ) input.readObject() );
+            } catch (IOException | ClassNotFoundException ex) {
+                Logger.getLogger(ClientReceiver.class.getName()).
+                        log(Level.SEVERE, null, ex);
+            }
         }
     }
     
