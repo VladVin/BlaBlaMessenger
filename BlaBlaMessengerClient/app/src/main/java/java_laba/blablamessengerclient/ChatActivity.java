@@ -21,6 +21,8 @@ import data_processor.DataSender;
 import data_processor.DataSenderException;
 import data_structures.CommandData;
 import data_structures.Commands;
+import data_structures.Contacts;
+import data_structures.ResultData;
 
 import static android.widget.Toast.*;
 
@@ -80,8 +82,7 @@ public class ChatActivity extends ActionBarActivity {
 
     private void ShowError(final String text){
         runOnUiThread(new Runnable() {
-            public void run()
-            {
+            public void run() {
                 makeText(ChatActivity.this, text, LENGTH_LONG).show();
             }
         });
@@ -116,7 +117,10 @@ public class ChatActivity extends ActionBarActivity {
 
                 try
                 {
-                    dataSender.sendMessage("Hello, the server!");
+
+                    CommandData data = new CommandData();
+                    data.Command = Commands.RefreshContacts;
+                    dataSender.sendData(data);
                 }
                 catch (Exception e)
                 {
@@ -125,7 +129,7 @@ public class ChatActivity extends ActionBarActivity {
 
                 try
                 {
-                    UUID message = dataSender.receiveMessage();
+                    ResultData message = dataSender.receiveMessage();
                     if (message != null)
                     {
                         ShowMessage("Data received from server: " + message.toString());

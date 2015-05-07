@@ -36,6 +36,7 @@ public class DataSender extends Thread {
         try
         {
             objOutStream.writeObject(comData);
+            objOutStream.flush();
         }
         catch(IOException io)
         {
@@ -55,8 +56,8 @@ public class DataSender extends Thread {
         }
     }
 
-    public UUID receiveMessage() throws DataSenderException{
-        UUID result = null;
+    public ResultData receiveMessage() throws DataSenderException{
+        ResultData result = null;
 
         if (objInStream == null)
         {
@@ -73,7 +74,7 @@ public class DataSender extends Thread {
 
         try
         {
-            result = (UUID)objInStream.readObject();
+            result = (ResultData)objInStream.readObject();
         }
         catch(Exception e)
         {
