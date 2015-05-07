@@ -1,3 +1,11 @@
+RegisterClient
+    input -- ComData{ command=RegisterClient, uuid=null, data=ClientName }
+    output -- ResData{ command=ReceivedClientUuid, data=UUID of client }
+
+Disconnect:
+	input -- ComData{ command=Disconnect, uuid=null, data=null }
+	output -- null
+
 Refresh contacts:
     input -- ComData{ command=RefreshContacts, uuid=null, data=null }
     output -- ResData{ resultType=UpdatedContacts, data=List<Contact> }

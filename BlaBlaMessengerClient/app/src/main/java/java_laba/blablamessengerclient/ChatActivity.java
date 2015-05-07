@@ -8,20 +8,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import android.util.Log;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.UUID;
 
 import data_processor.DataSender;
 import data_processor.DataSenderException;
 import data_structures.CommandData;
 import data_structures.Commands;
-import data_structures.Contacts;
 import data_structures.ResultData;
 
 import static android.widget.Toast.*;
@@ -117,7 +114,12 @@ public class ChatActivity extends ActionBarActivity {
 
                 try
                 {
-
+                    CommandData dataClientName = new CommandData();
+                    dataClientName.Command = Commands.RegisterClient;
+                    data_structures.ClientName clientName = new data_structures.ClientName();
+                    clientName.name = "VladVin";
+                    dataClientName.Data = (data_structures.DataObject)clientName;
+                    dataSender.sendData(dataClientName);
                     CommandData data = new CommandData();
                     data.Command = Commands.RefreshContacts;
                     dataSender.sendData(data);
@@ -129,11 +131,8 @@ public class ChatActivity extends ActionBarActivity {
 
                 try
                 {
-                    ResultData message = dataSender.receiveMessage();
-                    if (message != null)
-                    {
-                        ShowMessage("Data received from server: " + message.toString());
-                    }
+                    ResultData messageUuid = dataSender.receiveMessage();
+                    ResultData messageContacts = dataSender.receiveMessage();
                 }
                 catch (Exception e)
                 {

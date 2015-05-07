@@ -4,12 +4,11 @@ import data_structures.CommandData;
 import data_structures.Commands;
 import data_structures.Conference;
 import data_structures.Contact;
+
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -18,19 +17,12 @@ import java.util.logging.Logger;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Server extends Thread {
-    final int port = 2671;
-    InetAddress ip = null;
+    final int port = 4444;
       
     ClientBase clientBase = new ClientBase();
     
     public Server()
     {
-        try {
-            ip = InetAddress.getLocalHost();
-        } catch (UnknownHostException ex) {
-            Logger.getLogger(Server.class.getName()).
-                    log(Level.SEVERE, null, ex);
-        }
         CONNECTION_TIMEOUT = 500;
     }
     
@@ -51,8 +43,8 @@ public class Server extends Thread {
         
         public void addClient( UUID clientId, ClientReceiver client )
         { clients.put( clientId, client ); }
-        public ClientReceiver removeClient( UUID clientId )
-        { return clients.remove( clientId ); }
+        public void removeClient( UUID clientId )
+        { clients.remove( clientId ); }
         public ClientReceiver getClient( UUID clientId )
         { return clients.get( clientId ); }
         
@@ -66,6 +58,8 @@ public class Server extends Thread {
     
     public void release( ServerSocket socket )
     {
+        addLog( Server.class.getName() +
+                ": server shutting down" );
         try {
             socket.close();
         } catch (IOException ex) {
@@ -78,23 +72,29 @@ public class Server extends Thread {
             client.getValue().addCommand( new CommandData(
                     Commands.Disconnect, null, null ) );
         });
+        
+        addLog( Server.class.getName() +
+                ": server is off" );
     }
     
     @Override
     public void run()
     {
+        addLog( Server.class.getName() +
+                ": server started" );
         try ( ServerSocket serverSocket = new ServerSocket( port ) ) {
             serverSocket.setSoTimeout( CONNECTION_TIMEOUT );
             
             while ( !this.isInterrupted() ) {
                 try {
                     Socket newClient = serverSocket.accept();
-                    new ClientReceiver( clientBase, newClient ).start();             
+                    addLog( Server.class.getName() + 
+                            ": waited new client" );
+                    new ClientReceiver( clientBase, newClient ).start();
                 } catch ( SocketTimeoutException e ) {}
             }
-
-            release( serverSocket );
             
+            release( serverSocket );     
         } catch (IOException ex) {
             Logger.getLogger(Server.class.getName()).
                     log(Level.SEVERE, null, ex);
