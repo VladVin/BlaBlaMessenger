@@ -8,20 +8,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import android.util.Log;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.UUID;
 
 import data_processor.DataSender;
 import data_processor.DataSenderException;
 import data_structures.CommandData;
 import data_structures.Commands;
-import data_structures.Contacts;
 import data_structures.ResultData;
 
 import static android.widget.Toast.*;
