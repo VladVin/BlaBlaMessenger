@@ -6,5 +6,5 @@ import java.util.UUID;
 public class ContactId extends DataObject {
     public UUID Id;
 
-    public ContactId( final UUID id ) { Id = id; }
+    public ContactId() { Id = UUID.randomUUID(); }
 }

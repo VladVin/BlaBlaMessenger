@@ -10,11 +10,10 @@ public class Conference extends DataObject{
     public ArrayList< UUID > Contacts;
     
     public Conference( final ConferenceName name, 
-            final ConferenceId id, 
             final ArrayList< UUID > contacts )
     {
         Name = name;
-        Id = id;
+        Id = new ConferenceId();
         Contacts = contacts;
     }
 }

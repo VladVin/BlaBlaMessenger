@@ -6,5 +6,5 @@ import java.util.UUID;
 public class ConferenceId extends DataObject {
     public UUID Id;
     
-    public ConferenceId( UUID id ) { Id = id; }
+    public ConferenceId() { Id = UUID.randomUUID(); }
 }
