@@ -1,4 +1,4 @@
-import java.io.Serializable;
+package data_structures;
 
 /**
  * Created by VladVin on 26.04.2015.

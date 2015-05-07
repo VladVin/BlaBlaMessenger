@@ -1,13 +1,3 @@
-!!! 
-    Client: Contact{ Name, Uuid }
-    Server: Contact{ Name, Uuid } && Client{ Thread, Uuid }
-
-    -------------------------------------------------------
-
-    ComData{ Command, UUID, Object } --> ComData{ Command, Object }
-!!!
-
-
 Refresh contacts:
     input -- ComData{ command=RefreshContacts, uuid=null, data=null }
     output -- ResData{ resultType=UpdatedContacts, data=List<Contact> }

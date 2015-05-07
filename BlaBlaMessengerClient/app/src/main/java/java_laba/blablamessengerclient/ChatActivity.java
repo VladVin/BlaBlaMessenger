@@ -1,19 +1,60 @@
 package java_laba.blablamessengerclient;
 
+import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
+import android.util.Log;
+
+import java.io.IOException;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.UUID;
+
+import data_processor.DataSender;
+import data_processor.DataSenderException;
+import data_structures.CommandData;
+import data_structures.Commands;
+
+import static android.widget.Toast.*;
 
 public class ChatActivity extends ActionBarActivity {
 
+    private Socket client;
+    private static final String ipAddress = "192.168.137.138";
+    private String ip;
+    private static final int port = 4444;
+
+    private Button sendMessageButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        Log.d("MyLog", "onCreate called");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
-    }
 
+        sendMessageButton = (Button)findViewById(R.id.sendMessage);
+        sendMessageButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                EditText editText = (EditText)findViewById(R.id.ipAddressField);
+                ip = editText.getText().toString();
+                if (ip.length() != 15)
+                {
+                    ip = ipAddress;
+                    ShowMessage("Using default IP Address");
+                }
+                MessageSenderTask senderTask = new MessageSenderTask();
+                senderTask.execute();
+            }
+        });
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -35,5 +76,76 @@ public class ChatActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void ShowError(final String text){
+        runOnUiThread(new Runnable() {
+            public void run()
+            {
+                makeText(ChatActivity.this, text, LENGTH_LONG).show();
+            }
+        });
+        finish();
+    }
+
+    private void ShowMessage(final String text){
+        runOnUiThread(new Runnable() {
+            public void run()
+            {
+                makeText(ChatActivity.this, text, LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private class MessageSenderTask extends AsyncTask<Void, Void, Void>{
+        @Override
+        protected Void doInBackground(Void... params){
+            try
+            {
+                client = new Socket(ip, port);
+                DataSender dataSender = null;
+                try
+                {
+                    dataSender = new DataSender(client);
+
+                }
+                catch (DataSenderException e)
+                {
+                    ShowMessage("Cannot create DataSender: " + e.getMessage());
+                }
+
+                try
+                {
+                    dataSender.sendMessage("Hello, the server!");
+                }
+                catch (Exception e)
+                {
+                    ShowMessage("Cannot send data");
+                }
+
+                try
+                {
+                    UUID message = dataSender.receiveMessage();
+                    if (message != null)
+                    {
+                        ShowMessage("Data received from server: " + message.toString());
+                    }
+                }
+                catch (Exception e)
+                {
+                    ShowMessage("Cannot receive data");
+                }
+            }
+            catch(UnknownHostException e)
+            {
+                e.printStackTrace();
+            }
+            catch(IOException e)
+            {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
     }
 }
