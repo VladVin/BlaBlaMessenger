@@ -1,13 +1,3 @@
-!!! 
-    Client: Contact{ Name, Uuid }
-    Server: Contact{ Name, Uuid } && Client{ Thread, Uuid }
-
-    -------------------------------------------------------
-
-    ComData{ Command, UUID, Object } --> ComData{ Command, Object }
-!!!
-
-
 RegisterClient
     input -- ComData{ command=RegisterClient, uuid=null, data=ClientName }
     output -- ResData{ command=ReceivedClientUuid, data=UUID of client }
