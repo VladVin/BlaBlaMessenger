@@ -1,29 +1,26 @@
 package data_structures;
 
 import java.util.ArrayList;
-import java.util.UUID;
 
 public class Conference extends DataObject {
-    public class ConferenceId extends DataObject {
-        public UUID Id;
-    
-        public ConferenceId() { Id = UUID.randomUUID(); }
-    }
-    public class ConferenceName extends DataObject {
-        public String Name;
-    
-        public ConferenceName( String name ) { Name = name; }
-    }
-    
     public ConferenceName Name;
     public ConferenceId Id;
-    public ArrayList< UUID > Contacts;
+    public ArrayList< ContactId > Members;
     
     public Conference( final ConferenceName name, 
-            final ArrayList< UUID > contacts )
+            final ConferenceId id,
+            final ArrayList< ContactId > members )
+    {
+        Name = name;
+        Id = id;
+        Members = members;
+    }
+    
+    public Conference( final ConferenceName name, 
+            final ArrayList< ContactId > members )
     {
         Name = name;
         Id = new ConferenceId();
-        Contacts = contacts;
+        Members = members;
     }
 }

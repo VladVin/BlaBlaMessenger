@@ -1,7 +1,5 @@
 package data_structures;
 
-import data_structures.Contact.ContactId;
-
 public class ContactMessagePair extends DataObject {
     public ContactId Contact;
     public MessageData Message;
