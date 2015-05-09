@@ -1,8 +1,6 @@
 package blablamessenger;
 
 public class ServerFrame extends javax.swing.JFrame {
-    Server server;
-    
     public ServerFrame() {
         initComponents();
         Off.setEnabled( false );
@@ -82,4 +80,5 @@ public class ServerFrame extends javax.swing.JFrame {
     private java.awt.Button Off;
     private java.awt.Button On;
     // End of variables declaration//GEN-END:variables
+    private Server server;
 }

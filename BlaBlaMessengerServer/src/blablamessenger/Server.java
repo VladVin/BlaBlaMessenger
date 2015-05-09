@@ -1,7 +1,6 @@
 package blablamessenger;
 
 import blablamessenger.Command.Sources;
-import data_structures.CommandData;
 import data_structures.Commands;
 import data_structures.Conference;
 import data_structures.ConferenceId;
