@@ -1,7 +1,7 @@
 package data_structures;
 
 public enum ResultTypes {
-    ReceivedClientUuid,
+    ContactId,
     UpdatedContacts,
     CreatedConference,
     AddedToConference,
@@ -10,7 +10,7 @@ public enum ResultTypes {
     DeletedConference,
     Message,
     UpdatedFiles,
-    UploadedFileToStorage,
-    DownloadedFileFromStorage,
+    UploadedFile,
+    DownloadedFile,
     RemovedFile
 }
