@@ -1,8 +1,9 @@
-package data_structures.CommandData;
+package data_structures;
 
 import data_structures.Commands;
 import data_structures.DataObject;
 import java.io.Serializable;
+import java.util.UUID;
 
 public class CommandData implements Serializable {
     public Commands Command;
@@ -16,5 +17,11 @@ public class CommandData implements Serializable {
         Command = command;
         Id = id;
         Data = data;
+    }
+    
+    public class CommandId extends DataObject {
+        public UUID Id;
+    
+        public CommandId( final UUID id ) { Id = id; }
     }
 }
