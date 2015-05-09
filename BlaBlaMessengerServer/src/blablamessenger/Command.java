@@ -1,9 +1,9 @@
 package blablamessenger;
 
 import data_structures.CommandData;
+import data_structures.CommandId;
 import data_structures.Commands;
 import data_structures.DataObject;
-import java.util.UUID;
 
 public class Command { 
     public enum Sources {
@@ -13,21 +13,27 @@ public class Command {
     
     public Sources Source;
     public Commands Command;
-    public UUID Uuid;
+    public CommandId Id;
     public DataObject Data;
     
-    public Command( Sources src, 
-            Commands command, UUID id, DataObject data) 
+    public Command( final Sources src, 
+            final Commands command, final CommandId id, final DataObject data) 
     {
         Source = src;
         Command = command;
-        Uuid = id;
+        Id = id;
         Data = data;
     }    
-    public Command( Sources source, CommandData commandData ) {
+    public Command( final Sources source, final CommandData commandData ) {
         Source = source;
         Command = commandData.Command;
-        Uuid = commandData.Uuid;
+        Id = commandData.Id;
         Data = commandData.Data;
+    }
+    public Command( final Sources source, final Command command ) {
+        Source = source;
+        Command = command.Command;
+        Id = command.Id;
+        Data = command.Data;
     }
 }
