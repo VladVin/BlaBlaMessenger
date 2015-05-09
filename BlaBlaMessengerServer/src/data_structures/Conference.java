@@ -8,19 +8,17 @@ public class Conference extends DataObject {
     public ArrayList< ContactId > Members;
     
     public Conference( final ConferenceName name, 
-            final ConferenceId id,
             final ArrayList< ContactId > members )
     {
         Name = name;
-        Id = id;
+        Id = null;
         Members = members;
     }
     
-    public Conference( final ConferenceName name, 
-            final ArrayList< ContactId > members )
+    public Conference( final Conference conference )
     {
-        Name = name;
+        Name = conference.Name;
         Id = new ConferenceId();
-        Members = members;
+        Members = conference.Members;
     }
 }
