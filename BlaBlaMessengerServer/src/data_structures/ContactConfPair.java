@@ -1,11 +1,16 @@
 package data_structures;
 
-import java.util.UUID;
+import data_structures.Contact.ContactId;
+import data_structures.Conference.ConferenceId;
 
-/**
- * Created by VladVin on 25.04.2015.
- */
 public class ContactConfPair extends DataObject {
-    public UUID ConfID;
-    public UUID ContactID;
+    public ContactId Contact;
+    public ConferenceId Conference;
+    
+    public ContactConfPair( final ContactId contact, 
+            final ConferenceId conference )
+    {
+        Contact = contact;
+        Conference = conference;
+    }
 }

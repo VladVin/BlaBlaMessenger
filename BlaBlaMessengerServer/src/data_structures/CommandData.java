@@ -5,13 +5,21 @@ import java.util.UUID;
 
 public class CommandData implements Serializable {
     public Commands Command;
-    public UUID Uuid;
+    public CommandId Id;
     public DataObject Data;
     
-    public CommandData ( Commands command, UUID id, DataObject data )
+    public CommandData( final Commands command, 
+            final CommandId id, 
+            final DataObject data )
     {
         Command = command;
-        Uuid = id;
+        Id = id;
         Data = data;
+    }
+    
+    public class CommandId extends DataObject {
+        public UUID Id;
+    
+        public CommandId( final UUID id ) { Id = id; }
     }
 }
