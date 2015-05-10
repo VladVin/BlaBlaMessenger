@@ -23,22 +23,22 @@ public class Server extends Thread {
     public class ClientBase {
         public void addContact( Contact contact ) 
         { contacts.put( contact.Id, contact ); }
-        public void removeContact( ContactId contact ) 
-        { contacts.remove( contact ); }
+        public Contact removeContact( ContactId contact ) 
+        { return contacts.remove( contact ); }
         public ArrayList< Contact > getContacts()
         { return ( ArrayList< Contact > ) contacts.elements(); }
         
         public void addConference( Conference conference )
         { conferences.put( conference.Id, conference ); }
-        public void removeConference( ConferenceId conference )
-        { conferences.remove( conference ); }
+        public Conference removeConference( ConferenceId conference )
+        { return conferences.remove( conference ); }
         public Conference getConference( ConferenceId id )
         { return conferences.get( id ); }
         
         public void addClient( ContactId contact, ClientReceiver client )
         { clients.put( contact, client ); }
-        public void removeClient( ContactId client )
-        { clients.remove( client ); }
+        public ClientReceiver removeClient( ContactId client )
+        { return clients.remove( client ); }
         public ClientReceiver getClient( ContactId contact )
         { return clients.get( contact ); }
         
