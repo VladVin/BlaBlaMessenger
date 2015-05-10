@@ -39,8 +39,12 @@ Send message to contact:
     output -- ResData{ command=Message, data=ContactMessagePair }
 
 Send message to conference: (Проверка на отправку в конференцию, в которой не состоишь? - Не надо!)
-    input -- ComData{ command=SendMessageToConference, data=ConferenceMessagePair }
-    output -- Broadcast -> ResData={ resultType=Message, data=ContactMessagePair }
+    input -- ComData{ command=SendMessageToConference, data=ContactConfMessagePair={ 
+            ContactId=Source,
+            ConfMessagePair={ ConferenceId=Destionation, Message=Message }
+        } 
+    }
+    output -- Broadcast -> ResData={ resultType=Message, data=ContactConfMessagePair }
 
 Refresh files:
     input -- ComData{ command=RefreshStorage, data=null }
