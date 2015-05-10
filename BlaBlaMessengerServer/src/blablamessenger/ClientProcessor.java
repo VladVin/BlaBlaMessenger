@@ -83,6 +83,7 @@ public class ClientProcessor extends Thread {
             case DeleteConference:
                 addLog( ClientProcessor.class.getName() + 
                         ": get delete conference command" );
+                deleteConference( command );
             break;
             case SendMessageToContact:
                 addLog( ClientProcessor.class.getName() + 
@@ -174,7 +175,6 @@ public class ClientProcessor extends Thread {
             clientBase.getClient( member ).
                 addCommand( new Command(Sources.Server, 
                         Commands.RemoveFromConference,
-                        null,
                         new ContactConfPair( contact, conference.Id )
                 ) );
         });
@@ -279,6 +279,11 @@ public class ClientProcessor extends Thread {
                 }
             }
         }       
+    }
+    
+    
+    private void deleteConference( Command command ) {
+        ConferenceId conference = ( ConferenceId ) command.Data;
     }
     
     private void writeResult( ResultData result )

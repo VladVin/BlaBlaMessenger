@@ -87,7 +87,7 @@ public class Server extends Thread {
         clientBase.clients.entrySet().stream().forEach(
                 (Entry< ContactId, ClientReceiver > client) -> {
             client.getValue().addCommand( new Command( Sources.Server,
-                    Commands.Disconnect, null, null ) );
+                    Commands.Disconnect, null ) );
         });
         
         addLog( Server.class.getName() + ": server is off" );
