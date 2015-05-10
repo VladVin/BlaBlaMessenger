@@ -171,13 +171,11 @@ public class ClientProcessor extends Thread {
     }
     private void notifyRemovedMember( Conference conference, ContactId contact )
     {
-        conference.Members.stream().forEach( (ContactId member) -> {
-            clientBase.getClient( member ).
-                addCommand( new Command(Sources.Server, 
-                        Commands.RemoveFromConference,
-                        new ContactConfPair( contact, conference.Id )
-                ) );
-        });
+        notifyMembers( new Command
+                (   Sources.Server, 
+                    Commands.RemoveFromConference, 
+                    new ContactConfPair( contact, conference.Id )),
+                conference );
     }
     
     private void refreshContacts()
@@ -198,7 +196,12 @@ public class ClientProcessor extends Thread {
         switch( command.Source ) {
             case Client:
                 clientBase.addConference( newConference );
-                notifyNewConference( command, newConference );
+                synchronized ( newConference ) {
+                    newConference.Members.remove( myContact );
+                    notifyNewConference( command, newConference );
+                    newConference.Members.add( myContact );
+                }
+
                 writeResult( new ResultData(ResultTypes.CreatedConference,
                     newConference.Id) );
             break;
@@ -208,15 +211,8 @@ public class ClientProcessor extends Thread {
             break;
         }
     }
-    private void notifyNewConference( Command command, Conference conference ) {
-        conference.Members.stream().
-            filter( (contact) -> (contact != myContact) ).
-                forEach( (ContactId contact) -> {
-                        clientBase.getClient( contact ).
-                        addCommand( new Command(Sources.Server, command) );
-                }
-            );
-    }
+    private void notifyNewConference( Command command, Conference conference ) 
+    { notifyMembers( new Command(Sources.Server, command), conference ); }
     
     private void addToConference( Command command )
     {
@@ -229,7 +225,7 @@ public class ClientProcessor extends Thread {
                 myConferences.add( add.Conference );
                 
                 synchronized ( conference ) {
-                    notifyNewConference( command, conference );
+                    notifyNewMember( command, conference );
                     conference.Members.add( myContact );                  
                     writeResult( new ResultData(ResultTypes.AddedConference,
                         conference) );
@@ -241,12 +237,7 @@ public class ClientProcessor extends Thread {
         }
     }
     private void notifyNewMember( Command command, Conference conference )
-    {
-        conference.Members.stream().forEach( (ContactId contact) -> {
-            clientBase.getClient( contact ).addCommand( new Command(
-                Sources.Server, command) );
-        });
-    }
+    { notifyMembers( new Command(Sources.Server, command), conference ); }
     
     private void removeFromConference( Command command ) 
     {
@@ -283,7 +274,37 @@ public class ClientProcessor extends Thread {
     
     
     private void deleteConference( Command command ) {
-        ConferenceId conference = ( ConferenceId ) command.Data;
+        ConferenceId remove = ( ConferenceId ) command.Data;
+        myConferences.remove( remove );
+        
+        switch ( command.Source ) {
+            case Client:
+                Conference conference = clientBase.removeConference( remove );
+                if ( conference != null ) {
+                    synchronized ( conference ) {
+                        conference.Members.remove( myContact );
+                        notifyDeleteConference( command, conference );
+                    }
+                    writeResult( new ResultData(ResultTypes.DeletedConference,
+                        remove) );
+               }
+            break;
+            case Server:
+                writeResult( new ResultData(ResultTypes.DeletedConference,
+                        remove) );
+            break;
+        }
+    }
+    private void notifyDeleteConference( Command command, 
+            Conference conference )
+    { notifyMembers( new Command(Sources.Server, command), conference ); }
+    
+    private void notifyMembers( Command command, Conference conference )
+    {
+        conference.Members.stream().forEach( (ContactId contact) -> {
+            clientBase.getClient( contact ).
+                addCommand( command );
+        });
     }
     
     private void writeResult( ResultData result )
