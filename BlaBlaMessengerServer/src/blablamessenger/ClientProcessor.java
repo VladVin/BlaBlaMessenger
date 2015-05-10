@@ -2,10 +2,12 @@ package blablamessenger;
 
 import blablamessenger.Command.Sources;
 import blablamessenger.Server.ClientBase;
+import data_structures.Commands;
 
 import data_structures.Conference;
 import data_structures.ConferenceId;
 import data_structures.Contact;
+import data_structures.ContactConfPair;
 import data_structures.ContactId;
 import data_structures.ContactName;
 import data_structures.Contacts;
@@ -75,6 +77,7 @@ public class ClientProcessor extends Thread {
             case RemoveFromConference:
                 addLog( ClientProcessor.class.getName() + 
                         ": get remove from conference command" );
+                removeFromConference( command );
             break;
             case DeleteConference:
                 addLog( ClientProcessor.class.getName() + 
@@ -131,27 +134,49 @@ public class ClientProcessor extends Thread {
     
     private void disconnect()
     {
-        clientBase.removeContact( myContact );
-        clientBase.removeClient( myContact );
+        disconnectClientReceiver();
+        deleteFromBase();
         
-        myConferences.stream().forEach((ConferenceId conference) -> {
+        myConferences.stream().forEach( (ConferenceId conference) -> {
             Conference myConference = clientBase.getConference( conference );
-            synchronized ( myConference ) {
-                myConference.Members.remove( myContact );
+            if ( myConference != null ) {
+                synchronized ( myConference ) {
+                    myConference.Members.remove( myContact );
+                }
                 if ( myConference.Members.isEmpty() ) {
                     clientBase.removeConference( conference );
+                } else {
+                    notifyRemovedMember( myConference, myContact );
                 }
             }
         });
-        
+  
+        running = false;
+    }
+    private void deleteFromBase()
+    {
+        clientBase.removeContact( myContact );
+        clientBase.removeClient( myContact );
+    }
+    private void disconnectClientReceiver()
+    {
         try {
-            output.close();
-        } catch ( IOException ex ) {
+            socket.close();
+        } catch (IOException ex) {
             Logger.getLogger( ClientProcessor.class.getName() ).
                     log( Level.SEVERE, null, ex );
         }
-        
-        running = false;
+    }
+    private void notifyRemovedMember( Conference conference, ContactId contact )
+    {
+        conference.Members.stream().forEach( (ContactId member) -> {
+            clientBase.getClient( member ).
+                addCommand( new Command(Sources.Server, 
+                        Commands.RemoveFromConference,
+                        null,
+                        new ContactConfPair( contact, conference.Id )
+                ) );
+        });
     }
     
     private void refreshContacts()
@@ -209,6 +234,39 @@ public class ClientProcessor extends Thread {
     private void notifyNewMemberConference()
     {
         
+    }
+    
+    private void removeFromConference( Command command ) 
+    {
+        ContactConfPair remove = ( ContactConfPair ) command.Data;
+        if ( remove.Contact == myContact ) {
+            removeMyContactFromConference( remove.Conference );
+        }
+        
+        if ( command.Source == Sources.Client ) {
+            Conference conference =  
+                clientBase.getConference( remove.Conference );
+            if ( conference != null ) {
+                notifyRemovedMember( conference, remove.Contact );
+            }
+        }
+        
+        writeResult( new ResultData( ResultTypes.RemovedFromConference,
+            remove ) );
+    }
+    private void removeMyContactFromConference( ConferenceId conference )
+    {
+        myConferences.remove( conference );
+        Conference myConference = 
+                clientBase.getConference( conference );
+        if ( myConference != null ) {
+            synchronized ( myConference ) {
+                myConference.Members.remove( myContact );
+            }
+            if ( myConference.Members.isEmpty() ) {
+                clientBase.removeConference( conference );
+            }
+        }       
     }
     
     private void writeResult( ResultData result )
