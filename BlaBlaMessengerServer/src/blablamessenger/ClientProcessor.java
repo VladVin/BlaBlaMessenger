@@ -73,6 +73,7 @@ public class ClientProcessor extends Thread {
             case AddToConference:
                 addLog( ClientProcessor.class.getName() + 
                         ": get add to conference command" );
+                addToConference( command );
             break;
             case RemoveFromConference:
                 addLog( ClientProcessor.class.getName() + 
@@ -202,7 +203,7 @@ public class ClientProcessor extends Thread {
                     newConference.Id) );
             break;
             case Server:
-                writeResult( new ResultData(ResultTypes.AddedToConference,
+                writeResult( new ResultData(ResultTypes.AddedToNewConference,
                     newConference) );
             break;
         }
