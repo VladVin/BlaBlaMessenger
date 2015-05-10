@@ -2,11 +2,13 @@ package blablamessenger;
 
 import blablamessenger.Command.Sources;
 import blablamessenger.Server.ClientBase;
-import data_structures.Commands;
 
+import data_structures.Commands;
 import data_structures.Conference;
 import data_structures.ConferenceId;
+import data_structures.ConfMessagePair;
 import data_structures.Contact;
+import data_structures.ContactConfMessagePair;
 import data_structures.ContactConfPair;
 import data_structures.ContactId;
 import data_structures.ContactMessagePair;
@@ -94,6 +96,7 @@ public class ClientProcessor extends Thread {
             case SendMessageToConference:
                 addLog( ClientProcessor.class.getName() + 
                         ": get send message to conference command" );
+                sendMessageToConference( command );
             break;
             case RefreshStorage:
                 addLog( ClientProcessor.class.getName() + 
@@ -176,7 +179,8 @@ public class ClientProcessor extends Thread {
         notifyMembers( new Command
                 (   Sources.Server, 
                     Commands.RemoveFromConference, 
-                    new ContactConfPair( contact, conference.Id )),
+                    new ContactConfPair( contact, conference.Id )
+                ),
                 conference );
     }
     
@@ -315,6 +319,29 @@ public class ClientProcessor extends Thread {
         writeResult( new ResultData(ResultTypes.Message,
             send) );
     }
+    
+    
+    private void sendMessageToConference( Command command ) 
+    {
+        ContactConfMessagePair send = 
+                ( ContactConfMessagePair ) command.Data;
+        switch ( command.Source ) {
+            case Client:
+                Conference conference = 
+                    clientBase.getConference(send.Message.Destination );
+                if ( conference != null ) {
+                    synchronized ( conference ) {
+                        notifyMessage( command, conference );
+                    }
+                }               
+            break;
+            case Server:
+                writeResult( new ResultData(ResultTypes.Message, send) );
+            break;
+        }     
+    }
+    private void notifyMessage( Command command, Conference conference )
+    { notifyMembers( new Command(Sources.Server, command), conference ); }
     
     private void notifyMembers( Command command, Conference conference )
     {
