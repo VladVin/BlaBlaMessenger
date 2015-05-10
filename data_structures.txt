@@ -33,7 +33,6 @@ enum ResultTypes {
 class ComData
 {
     Commands Command;
-    CommandId Id;
     ObjectData Data;
 }
 

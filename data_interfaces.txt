@@ -1,17 +1,17 @@
 RegisterContact
-    input -- ComData{ command=RegisterContact, id=null, data=ContactName }
+    input -- ComData{ command=RegisterContact, data=ContactName }
     output -- ResData{ command=ContactId, data=ContactId }
 
 Disconnect:
-	input -- ComData{ command=Disconnect, id=null, data=null }
+	input -- ComData{ command=Disconnect, data=null }
 	output -- null
 
 Refresh contacts:
-    input -- ComData{ command=RefreshContacts, id=null, data=null }
+    input -- ComData{ command=RefreshContacts, data=null }
     output -- ResData{ resultType=UpdatedContacts, data=Contacts }
 
 Create conference:
-    input -- ComData{ command=CreateConference, id=null, data=Conference{ 
+    input -- ComData{ command=CreateConference, data=Conference{ 
             name=ConferenceName;
             id=null;
             members=ArrayList< ContactId >;
@@ -21,33 +21,33 @@ Create conference:
               2. ResData{ resultType=AddedToNewConference, data=Conference }
 
 Add to conference:
-    input -- ComData{ command=AddToConference, id=null, data=ContactConfPair }
+    input -- ComData{ command=AddToConference, data=ContactConfPair }
     output -- 
         1. ResData{ resultType=AddedToConferece, data=ContactConfPair }
         2. ResData{ resultType=AddedConference, data=Conference (full with me) }
 
 Remove from conference:
-    input -- ComData{ command=RemoveFromConference, id=null, data=ContactConfPair }
+    input -- ComData{ command=RemoveFromConference, data=ContactConfPair }
     output -- ResData{ resultType=RemovedFromConference, data=ContactConfPair }
 
 Delete conference:
-    input -- ComData{ command=DeleteConference, id=ConferenceId, data=null }
+    input -- ComData{ command=DeleteConference, data=ConferenceId }
     output -- ResData{ resultType=DeletedConference, data=ConferenceId }
 
 Send message to contact:
-    input -- ComData{ command=SendMessageToContact, id=ContactId; data=Message }
+    input -- ComData{ command=SendMessageToContact, data=ContactMessagePair }
     output -- ResData{ command=Message, data=ContactMessagePair }
 
 Send message to conference: (Проверка на отправку в конференцию, в которой не состоишь? - Не надо!)
-    input -- ComData{ command=SendMessageToConference, id=ConferenceId, data=Message }
+    input -- ComData{ command=SendMessageToConference, data=ConferenceMessagePair }
     output -- Broadcast -> ResData={ resultType=Message, data=ContactMessagePair }
 
 Refresh files:
-    input -- ComData{ command=RefreshStorage, id=null, data=null }
+    input -- ComData{ command=RefreshStorage, data=null }
     output -- ResData{ resultType=UpdatedFiles, data=ArrayList< File > }
 
 Upload file to the storage:
-    input -- ComData{ command=UploadFile, id=null, data=File{
+    input -- ComData{ command=UploadFile, data=File{
             name=FileName;
             data=array of bytes of the file;
         }
@@ -55,9 +55,9 @@ Upload file to the storage:
     output -- ResData{ resultType=UploadedFile, data=bool }
 
 Download File from the Storage:
-    input -- ComData{ command=DownloadFile, id=FileId, data=null }
+    input -- ComData{ command=DownloadFile, data=FileId }
     output -- ResData{ resultType=DownloadedFile, data=FileData }
 
 Remove file from the storage:
-    input -- ComData{ command=RemoveFile, id=FileId, data=null}
+    input -- ComData{ command=RemoveFile, data=FileId }
     output -- ResData{ resultType=RemovedFile, data=bool }
