@@ -211,7 +211,7 @@ public class ClientProcessor extends Thread {
     private void notifyNewConference( Command command, Conference conference ) {
         conference.Members.stream().
             filter( (contact) -> (contact != myContact) ).
-                forEach( (contact) -> {
+                forEach( (ContactId contact) -> {
                         clientBase.getClient( contact ).
                         addCommand( new Command(Sources.Server, command) );
                 }
@@ -220,21 +220,32 @@ public class ClientProcessor extends Thread {
     
     private void addToConference( Command command )
     {
-        switch ( command.Source ) {
-            case Client:
+        ContactConfPair add = ( ContactConfPair ) command.Data;
+        
+        if ( add.Contact == myContact ) {
+            Conference conference = clientBase.getConference( add.Conference );
+            
+            if ( conference != null ) {
+                myConferences.add( add.Conference );
                 
-            break;
-            case Server:
-                
-            break;
-            default:
-                
-            break;
+                synchronized ( conference ) {
+                    notifyNewConference( command, conference );
+                    conference.Members.add( myContact );                  
+                    writeResult( new ResultData(ResultTypes.AddedConference,
+                        conference) );
+                }
+            }
+        } else {
+            writeResult( new ResultData(ResultTypes.AddedToConference,
+                add) );
         }
     }
-    private void notifyNewMemberConference()
+    private void notifyNewMember( Command command, Conference conference )
     {
-        
+        conference.Members.stream().forEach( (ContactId contact) -> {
+            clientBase.getClient( contact ).addCommand( new Command(
+                Sources.Server, command) );
+        });
     }
     
     private void removeFromConference( Command command ) 
