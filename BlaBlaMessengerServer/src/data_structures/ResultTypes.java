@@ -1,18 +1,17 @@
 package data_structures;
 
-/**
- * Created by VladVin on 25.04.2015.
- */
 public enum ResultTypes {
+    ContactId,
     UpdatedContacts,
     CreatedConference,
+    AddedToNewConference,
     AddedToConference,
     AddedConference,
     RemovedFromConference,
     DeletedConference,
     Message,
     UpdatedFiles,
-    UploadedFileToStorage,
-    DownloadedFileFromStorage,
+    UploadedFile,
+    DownloadedFile,
     RemovedFile
 }

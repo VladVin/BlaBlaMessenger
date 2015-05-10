@@ -13,53 +13,32 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ClientReceiver extends Thread {
-    ClientBase clientBase;
-    Socket socket;
-    
-    ObjectInputStream input;
-    
-    public void addCommand( CommandData command )
-    {   
-        commands.add( new Command ( Sources.Client, command ) );
-    }
+    public void addCommand( Command command ) { commands.add( command ); }
 
     public ClientReceiver( ClientBase base, Socket newClient )
     {
         clientBase = base;
-        socket = newClient;
-    }
-    
-    public void registrationNewClient()
-    {     
+        client = newClient;
+        
         try {
-            addLog( ClientReceiver.class.getName() + 
-                    ": waiting for client's name" );
-            input = new ObjectInputStream( socket.getInputStream() );
-            String clientName = ( String ) input.readObject();
-            addLog( ClientReceiver.class.getName() + 
-                    ": get client's name -- " +
-                    clientName );
-            
-            new ClientProcessor( clientBase, socket, 
-                    clientName, this, commands ).start();
-            addLog( ClientReceiver.class.getName() + 
-                    ": start new client processor" );
-        } catch ( IOException | ClassNotFoundException ex ) {
-            Logger.getLogger(ClientReceiver.class.getName()).
-                    log(Level.SEVERE, null, ex);
+            input = new ObjectInputStream( client.getInputStream() );
+        } catch ( IOException ex ) {
+            Logger.getLogger( ClientReceiver.class.getName()).
+                    log(Level.SEVERE, null, ex );
         }
     }
     
     @Override
     public void run()
-    {   
-        registrationNewClient();
+    {
+        createProcessor();
         
         while ( true ) {
             try {
                 addLog( ClientReceiver.class.getName() + 
                         ": waiting for new command" );
-                addCommand( ( CommandData ) input.readObject() );
+                CommandData newCommand = ( CommandData ) input.readObject();
+                addCommand( new Command( Sources.Client, newCommand ) );
                 addLog( ClientReceiver.class.getName() + 
                         ": added new command" );
             } catch ( IOException | ClassNotFoundException ex ) {
@@ -71,11 +50,17 @@ public class ClientReceiver extends Thread {
                 ": released" );
     }
     
-    public void addLog( String log )
+    private void createProcessor()
     {
-        System.out.println( log );
+        new ClientProcessor( clientBase, client, this, commands ).start();
     }
-        
+    
+    private void addLog( String log ) { System.out.println( log ); }
+    
+    private ClientBase clientBase;
+    private Socket client;
+    
+    private ObjectInputStream input;
     private ConcurrentLinkedQueue< Command > commands = 
             new ConcurrentLinkedQueue<>();
 }
