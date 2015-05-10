@@ -1,13 +1,13 @@
 package data_structures;
 
-public class ConferenceMessagePair extends DataObject {
-    public ConferenceId Conference;
+public class ConfMessagePair extends DataObject {
+    public ConferenceId Destination;
     public MessageData Message;
     
-    public ConferenceMessagePair( final ConferenceId conference, 
+    public ConfMessagePair( final ConferenceId destination, 
             final MessageData message )
     {
-        Conference = conference;
+        Destination = destination;
         Message = message;
     }
 }
