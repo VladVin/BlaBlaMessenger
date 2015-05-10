@@ -142,11 +142,11 @@ public class ClientProcessor extends Thread {
             if ( myConference != null ) {
                 synchronized ( myConference ) {
                     myConference.Members.remove( myContact );
-                }
-                if ( myConference.Members.isEmpty() ) {
-                    clientBase.removeConference( conference );
-                } else {
-                    notifyRemovedMember( myConference, myContact );
+                    if ( myConference.Members.isEmpty() ) {
+                        clientBase.removeConference( conference );
+                    } else {
+                        notifyRemovedMember( myConference, myContact );
+                    }
                 }
             }
         });
@@ -262,9 +262,9 @@ public class ClientProcessor extends Thread {
         if ( myConference != null ) {
             synchronized ( myConference ) {
                 myConference.Members.remove( myContact );
-            }
-            if ( myConference.Members.isEmpty() ) {
-                clientBase.removeConference( conference );
+                if ( myConference.Members.isEmpty() ) {
+                    clientBase.removeConference( conference );
+                }
             }
         }       
     }

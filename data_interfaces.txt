@@ -18,7 +18,7 @@ Create conference:
         }
     }
     output -- 1. ResData{ resultType=CreatedConference, data=ConferenceId }
-              2. ResData{ resultType=AddedToConference, data=Conference }
+              2. ResData{ resultType=AddedToNewConference, data=Conference }
 
 Add to conference:
     input -- ComData{ command=AddToConference, id=null, data=ContactConfPair }

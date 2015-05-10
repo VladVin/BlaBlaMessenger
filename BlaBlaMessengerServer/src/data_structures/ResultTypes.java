@@ -4,6 +4,7 @@ public enum ResultTypes {
     ContactId,
     UpdatedContacts,
     CreatedConference,
+    AddedToNewConference,
     AddedToConference,
     AddedConference,
     RemovedFromConference,
