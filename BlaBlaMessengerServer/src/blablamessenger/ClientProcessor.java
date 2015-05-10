@@ -9,6 +9,7 @@ import data_structures.ConferenceId;
 import data_structures.Contact;
 import data_structures.ContactConfPair;
 import data_structures.ContactId;
+import data_structures.ContactMessagePair;
 import data_structures.ContactName;
 import data_structures.Contacts;
 import data_structures.ResultData;
@@ -88,6 +89,7 @@ public class ClientProcessor extends Thread {
             case SendMessageToContact:
                 addLog( ClientProcessor.class.getName() + 
                         ": get send message to contact command" );
+                sendMessageToContact( command );
             break;
             case SendMessageToConference:
                 addLog( ClientProcessor.class.getName() + 
@@ -298,6 +300,21 @@ public class ClientProcessor extends Thread {
     private void notifyDeleteConference( Command command, 
             Conference conference )
     { notifyMembers( new Command(Sources.Server, command), conference ); }
+    
+    private void sendMessageToContact( Command command ) 
+    {
+        ContactMessagePair send = ( ContactMessagePair ) command.Data;
+        if ( command.Source == Sources.Client ) {
+            clientBase.getClient( send.Contact ).addCommand( new Command
+                (   Sources.Server,
+                    Commands.SendMessageToContact,
+                    new ContactMessagePair(myContact, send.Message)
+                ) );       
+        } 
+        
+        writeResult( new ResultData(ResultTypes.Message,
+            send) );
+    }
     
     private void notifyMembers( Command command, Conference conference )
     {
