@@ -1,4 +1,4 @@
-package data_processor;
+package cloud;
 
 /**
  * Created by VladVin on 05.05.2015.

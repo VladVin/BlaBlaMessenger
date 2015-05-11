@@ -15,8 +15,12 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import data_processor.DataSender;
-import data_processor.DataSenderException;
+import cloud.Cloud;
+import cloud.CloudException;
+import cloud.DataSender;
+import cloud.DataSenderException;
+import data_storage.DataStorage;
+import data_structures.ClientName;
 import data_structures.CommandData;
 import data_structures.Commands;
 import data_structures.ResultData;
@@ -29,6 +33,9 @@ public class ChatActivity extends ActionBarActivity {
     private static final String ipAddress = "192.168.137.138";
     private String ip;
     private static final int port = 4444;
+    private DataSender dataSender;
+    private DataStorage storage;
+    private Cloud cloud;
 
     private Button sendMessageButton;
 
@@ -47,12 +54,24 @@ public class ChatActivity extends ActionBarActivity {
                 if (ip.length() != 15)
                 {
                     ip = ipAddress;
-                    ShowMessage("Using default IP Address");
+                    showMessage("Using default IP Address");
                 }
                 MessageSenderTask senderTask = new MessageSenderTask();
                 senderTask.execute();
             }
         });
+
+
+        storage = new DataStorage();
+        try
+        {
+            cloud = new Cloud(storage);
+        }
+        catch(CloudException e)
+        {
+            showError("Cloud: " + e.getMessage());
+        }
+        cloud.runDataListener();
     }
 
     @Override
@@ -77,7 +96,7 @@ public class ChatActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void ShowError(final String text){
+    private void showError(final String text){
         runOnUiThread(new Runnable() {
             public void run() {
                 makeText(ChatActivity.this, text, LENGTH_LONG).show();
@@ -86,7 +105,7 @@ public class ChatActivity extends ActionBarActivity {
         finish();
     }
 
-    private void ShowMessage(final String text){
+    private void showMessage(final String text){
         runOnUiThread(new Runnable() {
             public void run()
             {
@@ -100,53 +119,17 @@ public class ChatActivity extends ActionBarActivity {
         protected Void doInBackground(Void... params){
             try
             {
-                client = new Socket(ip, port);
-                DataSender dataSender = null;
-                try
-                {
-                    dataSender = new DataSender(client);
-
-                }
-                catch (DataSenderException e)
-                {
-                    ShowMessage("Cannot create DataSender: " + e.getMessage());
-                }
-
-                try
-                {
-                    CommandData dataClientName = new CommandData();
-                    dataClientName.Command = Commands.RegisterClient;
-                    data_structures.ClientName clientName = new data_structures.ClientName();
-                    clientName.name = "VladVin";
-                    dataClientName.Data = (data_structures.DataObject)clientName;
-                    dataSender.sendData(dataClientName);
-                    CommandData data = new CommandData();
-                    data.Command = Commands.RefreshContacts;
-                    dataSender.sendData(data);
-                }
-                catch (Exception e)
-                {
-                    ShowMessage("Cannot send data");
-                }
-
-                try
-                {
-                    ResultData messageUuid = dataSender.receiveMessage();
-                    ResultData messageContacts = dataSender.receiveMessage();
-                }
-                catch (Exception e)
-                {
-                    ShowMessage("Cannot receive data");
-                }
+                dataSender = new DataSender();
             }
-            catch(UnknownHostException e)
+            catch (DataSenderException e)
             {
-                e.printStackTrace();
+                showError("DataSender: " + e.getMessage());
             }
-            catch(IOException e)
-            {
-                e.printStackTrace();
-            }
+
+            CommandData comData = new CommandData();
+            comData.Command = Commands.RegisterClient;
+            //comData.Data = new ClientName()
+            dataSender.sendData(comData);
 
             return null;
         }
