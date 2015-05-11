@@ -3,8 +3,7 @@ package data_structures;
 import java.util.ArrayList;
 
 public class Contacts extends DataObject {
-    ArrayList< Contact > list;
+    ArrayList< Contact > Contacts;
     
-    public Contacts( ArrayList< Contact > contacts )
-    { list = contacts; }
+    public Contacts( ArrayList< Contact > contacts ) { Contacts = contacts; }
 }
