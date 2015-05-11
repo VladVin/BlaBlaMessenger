@@ -1,6 +1,7 @@
 package data_structures;
 
 public enum Commands {
+    RegisterContact,
     Disconnect,
     RefreshContacts,
     CreateConference,
@@ -10,7 +11,7 @@ public enum Commands {
     SendMessageToContact,
     SendMessageToConference,
     RefreshStorage,
-    UploadFileToStorage,
-    DownloadFileFromStorage,
-    RemoveFileFromStorage
+    UploadFile,
+    DownloadFile,
+    RemoveFile
 }

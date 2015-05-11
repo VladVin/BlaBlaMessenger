@@ -1,10 +1,9 @@
 package blablamessenger;
 
 public class ServerFrame extends javax.swing.JFrame {
-    Server server;
-    
     public ServerFrame() {
         initComponents();
+        Off.setEnabled( false );
     }
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -59,11 +58,15 @@ public class ServerFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void OnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OnActionPerformed
+        On.setEnabled( false );
+        Off.setEnabled( true );
         server = new Server();
         server.start();
     }//GEN-LAST:event_OnActionPerformed
 
     private void OffActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OffActionPerformed
+        Off.setEnabled( false );
+        On.setEnabled( true );
         server.interrupt();
     }//GEN-LAST:event_OffActionPerformed
 
@@ -77,4 +80,5 @@ public class ServerFrame extends javax.swing.JFrame {
     private java.awt.Button Off;
     private java.awt.Button On;
     // End of variables declaration//GEN-END:variables
+    private Server server;
 }

@@ -1,13 +1,12 @@
 package data_structures;
 
-import java.util.UUID;
-
 public class Contact extends DataObject {
-    public String Name;
-    public UUID Uuid;
-
-    public Contact( String name, UUID id ) {
+    public ContactName Name;
+    public ContactId Id;
+    
+    public Contact( final ContactName name )
+    {
         Name = name;
-        Uuid = id;
+        Id = new ContactId();
     }
 }

@@ -1,13 +1,24 @@
 package data_structures;
 
 import java.util.ArrayList;
-import java.util.UUID;
 
-/**
- * Created by VladVin on 26.04.2015.
- */
 public class Conference extends DataObject {
-    public String Name;
-    public UUID ConfID;
-    public ArrayList<UUID> ContactsIDs;
+    public ConferenceName Name;
+    public ConferenceId Id;
+    public ArrayList< ContactId > Members;
+    
+    public Conference( final ConferenceName name, 
+            final ArrayList< ContactId > members )
+    {
+        Name = name;
+        Id = null;
+        Members = members;
+    }
+    
+    public Conference( final Conference conference )
+    {
+        Name = conference.Name;
+        Id = new ConferenceId();
+        Members = conference.Members;
+    }
 }
