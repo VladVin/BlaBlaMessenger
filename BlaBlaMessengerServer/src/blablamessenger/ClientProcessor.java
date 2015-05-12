@@ -6,7 +6,6 @@ import blablamessenger.Server.ClientBase;
 import data_structures.Commands;
 import data_structures.Conference;
 import data_structures.ConferenceId;
-import data_structures.ConfMessagePair;
 import data_structures.Contact;
 import data_structures.ContactConfMessagePair;
 import data_structures.ContactConfPair;
@@ -130,6 +129,13 @@ public class ClientProcessor extends Thread {
     {
         ContactName name = ( ContactName ) command.Data;
         Contact newContact = new Contact( name );
+        myContact = newContact.Id;
+        
+        addLog( ClientProcessor.class.getName() +
+                ": name = " +
+                name.Name +
+                " receiver = " +
+                myReceiver.toString() );
         
         clientBase.addContact( newContact );
         clientBase.addClient( myContact, myReceiver );
@@ -328,7 +334,7 @@ public class ClientProcessor extends Thread {
         switch ( command.Source ) {
             case Client:
                 Conference conference = 
-                    clientBase.getConference(send.Message.Destination );
+                    clientBase.getConference( send.Message.Destination );
                 if ( conference != null ) {
                     synchronized ( conference ) {
                         notifyMessage( command, conference );
