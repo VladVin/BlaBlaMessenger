@@ -43,7 +43,7 @@ public class ClientReceiver extends Thread {
                         ": added new command" );
             } catch ( IOException | ClassNotFoundException ex ) {
                 break;
-            } 
+            }
         }
         
         addLog( ClientReceiver.class.getName() + 
