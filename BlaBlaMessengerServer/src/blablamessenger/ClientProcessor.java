@@ -127,22 +127,26 @@ public class ClientProcessor extends Thread {
     
     private void registerContact( Command command )
     {
-        ContactName name = ( ContactName ) command.Data;
-        Contact newContact = new Contact( name );
-        myContact = newContact.Id;
-        
-        addLog( ClientProcessor.class.getName() +
-                ": name = " +
-                name.Name +
-                " receiver = " +
-                myReceiver.toString() );
-        
-        clientBase.addContact( newContact );
-        clientBase.addClient( myContact, myReceiver );
-        
-        ResultData result = new ResultData( ResultTypes.ContactId, 
-                myContact );
-        writeResult( result );
+        if ( !registered ) {
+            registered = true;
+            
+            ContactName name = ( ContactName ) command.Data;
+            Contact newContact = new Contact( name );
+            myContact = newContact.Id;
+
+            addLog( ClientProcessor.class.getName() +
+                    ": name = " +
+                    name.Name +
+                    " receiver = " +
+                    myReceiver.toString() );
+
+            clientBase.addContact( newContact );
+            clientBase.addClient( myContact, myReceiver );
+
+            ResultData result = new ResultData( ResultTypes.ContactId, 
+                    myContact );
+            writeResult( result );
+        }
     }
     
     private void disconnect()
@@ -378,6 +382,7 @@ public class ClientProcessor extends Thread {
     private ClientReceiver myReceiver;
     
     private boolean running = true;
+    private boolean registered = false;
     
     private ConcurrentLinkedQueue< Command > commands = 
             new ConcurrentLinkedQueue<>();
