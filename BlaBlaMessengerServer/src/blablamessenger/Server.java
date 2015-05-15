@@ -26,7 +26,7 @@ public class Server extends Thread {
         public Contact removeContact( ContactId contact ) 
         { return contacts.remove( contact ); }
         public ArrayList< Contact > getContacts()
-        { return ( ArrayList< Contact > ) contacts.elements(); }
+        { return new ArrayList<>( contacts.values() ); }
         
         public void addConference( Conference conference )
         { conferences.put( conference.Id, conference ); }
