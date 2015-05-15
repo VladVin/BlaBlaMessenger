@@ -10,16 +10,21 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import android.util.Log;
+import android.widget.ListView;
+import android.widget.TextView;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import data_processor.DataSender;
-import data_processor.DataSenderException;
+import cloud.Cloud;
+import cloud.CloudException;
+import cloud.DataSender;
+import cloud.DataSenderException;
+import data_storage.DataStorage;
 import data_structures.CommandData;
 import data_structures.Commands;
-import data_structures.ResultData;
+import data_structures.ContactName;
 
 import static android.widget.Toast.*;
 
@@ -29,7 +34,9 @@ public class ChatActivity extends ActionBarActivity {
     private static final String ipAddress = "192.168.137.138";
     private String ip;
     private static final int port = 4444;
-
+    private DataSender dataSender;
+    private DataStorage storage = null;
+    private Cloud cloud = null;
     private Button sendMessageButton;
 
     @Override
@@ -42,17 +49,28 @@ public class ChatActivity extends ActionBarActivity {
         sendMessageButton = (Button)findViewById(R.id.sendMessage);
         sendMessageButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                EditText editText = (EditText)findViewById(R.id.ipAddressField);
-                ip = editText.getText().toString();
-                if (ip.length() != 15)
+                new Thread()
                 {
-                    ip = ipAddress;
-                    ShowMessage("Using default IP Address");
-                }
-                MessageSenderTask senderTask = new MessageSenderTask();
-                senderTask.execute();
+                    public void run() {
+                        CommandData comData = new CommandData(Commands.RegisterContact, new ContactName("VladVin"));
+                        CommandData queryContacts = new CommandData(Commands.RefreshContacts, null);
+                        try {
+                            cloud.requestData(comData);
+                            cloud.requestData(queryContacts);
+                            Log.d("MyLog", "Commands sent");
+                        }
+                        catch (CloudException e) {
+                            showMessage("Cloud: " + e.getMessage());
+                        }
+                        catch (NullPointerException e) {
+                            showMessage("Cloud has not been created yet");
+                        }
+                    }
+                }.start();
             }
         });
+
+        new DataUpdaterTask().execute();
     }
 
     @Override
@@ -77,7 +95,65 @@ public class ChatActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void ShowError(final String text){
+    private class DataUpdaterTask extends AsyncTask<Void, Void, Void>{
+        @Override
+        protected Void doInBackground(Void... params){
+            storage = new DataStorage();
+            try
+            {
+                cloud = new Cloud(storage);
+            }
+            catch(CloudException e)
+            {
+                showMessage("Cloud: " + e.getMessage());
+            }
+            if (cloud != null) {
+                synchronized (cloud) {
+                    cloud.start();
+                }
+            }
+
+            while (true)
+            {
+                synchronized (storage) {
+                    updateData(storage);
+                }
+                try
+                {
+                    Thread.sleep(50);
+                }
+                catch (InterruptedException e)
+                {
+                    return null;
+                }
+            }
+        }
+        private void updateData(final DataStorage storage)
+        {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    TextView resultField = (TextView)findViewById(R.id.resultField);
+                        if (storage.contactId != null && storage.contactId.Id != null)
+                        {
+                            resultField.setText(storage.contactId.Id.toString());
+                        }
+
+                    ListView contactsList = (ListView)findViewById(R.id.contactsList);
+                    if (storage.contacts != null) {
+                        contactsList.clearChoices();
+                        for (int i = 0; i < storage.contacts.Contacts.size(); ++i) {
+                            TextView contactName = new TextView(getBaseContext());
+                            contactName.setText(storage.contacts.Contacts.indexOf(i));
+                            contactsList.addView(contactName);
+                        }
+                    }
+                }
+            });
+        }
+
+    }
+    private void showError(final String text){
         runOnUiThread(new Runnable() {
             public void run() {
                 makeText(ChatActivity.this, text, LENGTH_LONG).show();
@@ -86,69 +162,12 @@ public class ChatActivity extends ActionBarActivity {
         finish();
     }
 
-    private void ShowMessage(final String text){
+    private void showMessage(final String text){
         runOnUiThread(new Runnable() {
             public void run()
             {
                 makeText(ChatActivity.this, text, LENGTH_LONG).show();
             }
         });
-    }
-
-    private class MessageSenderTask extends AsyncTask<Void, Void, Void>{
-        @Override
-        protected Void doInBackground(Void... params){
-            try
-            {
-                client = new Socket(ip, port);
-                DataSender dataSender = null;
-                try
-                {
-                    dataSender = new DataSender(client);
-
-                }
-                catch (DataSenderException e)
-                {
-                    ShowMessage("Cannot create DataSender: " + e.getMessage());
-                }
-
-                try
-                {
-                    CommandData dataClientName = new CommandData();
-                    dataClientName.Command = Commands.RegisterClient;
-                    data_structures.ClientName clientName = new data_structures.ClientName();
-                    clientName.name = "VladVin";
-                    dataClientName.Data = (data_structures.DataObject)clientName;
-                    dataSender.sendData(dataClientName);
-                    CommandData data = new CommandData();
-                    data.Command = Commands.RefreshContacts;
-                    dataSender.sendData(data);
-                }
-                catch (Exception e)
-                {
-                    ShowMessage("Cannot send data");
-                }
-
-                try
-                {
-                    ResultData messageUuid = dataSender.receiveMessage();
-                    ResultData messageContacts = dataSender.receiveMessage();
-                }
-                catch (Exception e)
-                {
-                    ShowMessage("Cannot receive data");
-                }
-            }
-            catch(UnknownHostException e)
-            {
-                e.printStackTrace();
-            }
-            catch(IOException e)
-            {
-                e.printStackTrace();
-            }
-
-            return null;
-        }
     }
 }

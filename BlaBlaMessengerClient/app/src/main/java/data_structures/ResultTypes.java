@@ -1,19 +1,19 @@
 package data_structures;
 
-/**
- * Created by VladVin on 25.04.2015.
- */
-public enum ResultTypes {
-    ReceivedClientUuid,
+import java.io.Serializable;
+
+public enum ResultTypes implements Serializable{
+    ContactId,
     UpdatedContacts,
     CreatedConference,
+    AddedToNewConference,
     AddedToConference,
     AddedConference,
     RemovedFromConference,
     DeletedConference,
     Message,
     UpdatedFiles,
-    UploadedFileToStorage,
-    DownloadedFileFromStorage,
+    UploadedFile,
+    DownloadedFile,
     RemovedFile
 }
