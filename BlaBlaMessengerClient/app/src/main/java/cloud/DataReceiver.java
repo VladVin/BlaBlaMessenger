@@ -1,5 +1,7 @@
 package cloud;
 
+import android.util.Log;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -14,56 +16,43 @@ import data_structures.ResultData;
 public class DataReceiver extends Thread {
     private final Socket socket;
     private ObjectInputStream objInStream = null;
-    private ReceiverStatus status = ReceiverStatus.NotBusy;
     private final ConcurrentLinkedQueue<ResultData> resDataQueue;
 
-    public DataReceiver(ConcurrentLinkedQueue<ResultData> queue) throws DataReceiverException {
+    public DataReceiver(Socket socket, ConcurrentLinkedQueue<ResultData> queue) throws DataReceiverException {
+        this.socket = socket;
+        resDataQueue = queue;
+
         try
         {
-            socket = new Socket(ConnectionTrash.IpAddress, ConnectionTrash.Port);
+            InputStream inStream = socket.getInputStream();
+            objInStream = new ObjectInputStream(inStream);
         }
-        catch (IOException e)
+        catch(IOException e)
         {
-            throw new DataReceiverException("Cannot connect to server");
+            throw new DataReceiverException("Cannot get input stream");
         }
-        resDataQueue = queue;
-    }
-
-    public void receiveData()
-    {
-        start();
     }
 
     public void run() {
-        status = ReceiverStatus.DataWaiting;
-
-        ResultData result = null;
-        if (objInStream == null)
-        {
-            try
-            {
-                InputStream inStream = socket.getInputStream();
-                objInStream = new ObjectInputStream(inStream);
-            }
-            catch(IOException e)
-            {
-                status = ReceiverStatus.Error;
-            }
-        }
-
         while (true)
         {
+            ResultData result = null;
             try
             {
+                Log.d("DataReceiver", "Waiting data...");
                 result = (ResultData)objInStream.readObject();
+                Log.d("DataReceiver", "Data received");
             }
             catch(Exception e)
             {
-                status = ReceiverStatus.Error;
+                Log.d("DataReceiver", "Read object exception");
+                // TODO: Handle the exception
             }
-            resDataQueue.add(result);
-            resDataQueue.notify();
-
+            if (result != null) resDataQueue.add(result);
+            synchronized (resDataQueue)
+            {
+                resDataQueue.notify();
+            }
         }
 
         // TODO: Add interrupting the thread

@@ -1,5 +1,7 @@
 package cloud;
 
+import android.util.Log;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -16,16 +18,12 @@ public class DataSender extends Thread {
     private final Socket socket;
     private ObjectOutputStream objOutStream = null;
     private CommandData comData = null;
+    private final Object dataSendingNotifier;
+    private boolean running = false;
 
-    public DataSender() throws DataSenderException{
-        try
-        {
-            socket = new Socket(ConnectionTrash.IpAddress, ConnectionTrash.Port);
-        }
-        catch (IOException e)
-        {
-            throw new DataSenderException("Cannot connect to server");
-        }
+    public DataSender(Socket socket) throws DataSenderException{
+        this.socket = socket;
+        this.dataSendingNotifier = new Object();
 
         try
         {
@@ -39,22 +37,39 @@ public class DataSender extends Thread {
     }
 
     public void run() {
-        try
-        {
-            objOutStream.writeObject(comData);
-            objOutStream.flush();
-        }
-        catch(IOException io)
-        {
+        running = true;
+
+        while (running) {
+            synchronized(dataSendingNotifier) {
+                try {
+                    dataSendingNotifier.wait();
+                }
+                catch (InterruptedException e) {
+                    // TODO: Handle the exception
+                }
+            }
+            try
+            {
+                objOutStream.writeObject(comData);
+                objOutStream.flush();
+            }
+            catch(IOException io)
+            {
+                // TODO: Handle the exception
+            }
         }
     }
 
     public void sendData(CommandData cData) throws DataSenderException {
         comData = cData;
-        start();
+        synchronized (dataSendingNotifier) {
+            dataSendingNotifier.notify();
+        }
     }
 
     public void cancel(){
+        // TODO: Disconnect
+        running = false;
         try
         {
             socket.close();
