@@ -4,6 +4,7 @@ import blablamessenger.Server.ClientBase;
 
 import blablamessenger.Command.Sources;
 import data_structures.CommandData;
+import data_structures.Commands;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -46,14 +47,16 @@ public class ClientReceiver extends Thread {
             }
         }
         
+        releaseProcessor();
         addLog( ClientReceiver.class.getName() + 
                 ": released" );
+        
     }
     
     private void createProcessor()
-    {
-        new ClientProcessor( clientBase, client, this, commands ).start();
-    }
+    { new ClientProcessor( clientBase, client, this, commands ).start(); }
+    private void releaseProcessor()
+    { addCommand( new Command( Sources.Client, Commands.Disconnect, null ) ); }
     
     private void addLog( String log ) { System.out.println( log ); }
     
