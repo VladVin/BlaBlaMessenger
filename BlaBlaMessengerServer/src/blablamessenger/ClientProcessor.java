@@ -2,6 +2,7 @@ package blablamessenger;
 
 import blablamessenger.Command.Sources;
 import blablamessenger.Server.ClientBase;
+import blablamessenger.Server.FileBase;
 
 import data_structures.Commands;
 import data_structures.Conference;
@@ -13,6 +14,7 @@ import data_structures.ContactId;
 import data_structures.ContactMessagePair;
 import data_structures.ContactName;
 import data_structures.Contacts;
+import data_structures.FileIdNamePairs;
 import data_structures.ResultData;
 import data_structures.ResultTypes;
 
@@ -25,13 +27,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ClientProcessor extends Thread {
-    public ClientProcessor( ClientBase base, Socket myClient,
+    public ClientProcessor( ClientBase clientBase, FileBase fileBase,
+            Socket myClient,
             ClientReceiver receiver, ConcurrentLinkedQueue inputCommands )
     {
-        clientBase = base;
+        this.clientBase = clientBase;
         socket = myClient;
         myReceiver = receiver;
         commands = inputCommands;
+        this.fileBase = fileBase;
         
         try {
             output = new ObjectOutputStream( socket.getOutputStream() );
@@ -90,6 +94,7 @@ public class ClientProcessor extends Thread {
             break;
             case RefreshStorage:
                 addLog( "get refresh storage command" );
+                refreshStorage();
             break;
             case UploadFile:
                 addLog( "get upload file command" );
@@ -187,14 +192,8 @@ public class ClientProcessor extends Thread {
     {
         if ( registered ) {
             Contacts contacts = new Contacts( clientBase.getContacts() );
-            
-            contacts.Contacts.add( new Contact( new ContactName( "Gladilov Gleb" ) ) );
-            
-            
-            ResultData result = new ResultData( ResultTypes.UpdatedContacts,
-                contacts );
-            
-            writeResult( result );           
+            writeResult( new ResultData( ResultTypes.UpdatedContacts,
+                contacts ) );           
         }
     }
     
@@ -334,10 +333,8 @@ public class ClientProcessor extends Thread {
                         Commands.SendMessageToContact,
                         new ContactMessagePair(myContact, send.Message)
                     ) );       
-            } 
-
-            writeResult( new ResultData(ResultTypes.Message,
-                send) );            
+            }
+            writeResult( new ResultData(ResultTypes.Message, send) );            
         }
     }
     
@@ -374,6 +371,14 @@ public class ClientProcessor extends Thread {
         });
     }
     
+    private void refreshStorage() 
+    {
+        if ( registered ) {
+            FileIdNamePairs files = fileBase.getFiles();
+            writeResult( new ResultData(ResultTypes.UpdatedFiles, files) );
+        }
+    }
+    
     private void writeResult( ResultData result )
     {
         try {
@@ -391,6 +396,7 @@ public class ClientProcessor extends Thread {
     }
     
     private ClientBase clientBase;
+    private FileBase fileBase;
     private Socket socket;
     
     private ObjectOutputStream output;
