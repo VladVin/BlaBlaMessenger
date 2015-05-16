@@ -41,8 +41,14 @@ public class ClientReceiver extends Thread {
             try {
                 addLog( "waiting for new command" );
                 CommandData newCommand = ( CommandData ) input.readObject();
-                addCommand( new Command( Sources.Client, newCommand ) );
-                addLog( "added new command" );
+                if ( registered ) {
+                    addCommand( new Command( Sources.Client, newCommand ) );
+                    addLog( "added new command" );                    
+                } else if ( newCommand.Command == Commands.RegisterContact ) {
+                    registered = true;
+                    addCommand( new Command( Sources.Client, newCommand ) );
+                    addLog( "added new command" );
+                }
             } catch ( IOException | ClassNotFoundException ex ) {
                 break;
             }
@@ -73,4 +79,5 @@ public class ClientReceiver extends Thread {
     private ObjectInputStream input;
     private ConcurrentLinkedQueue< Command > commands = 
             new ConcurrentLinkedQueue<>();
+    private boolean registered = false;
 }
