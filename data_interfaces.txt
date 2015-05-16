@@ -48,7 +48,7 @@ Send message to conference: (Проверка на отправку в конф�
 
 Refresh files:
     input -- ComData{ command=RefreshStorage, data=null }
-    output -- ResData{ resultType=UpdatedFiles, data=ArrayList< File > }
+    output -- ResData{ resultType=UpdatedFiles, data=FileIdNamePairs }
 
 Upload file to the storage:
     input -- ComData{ command=UploadFile, data=File{
