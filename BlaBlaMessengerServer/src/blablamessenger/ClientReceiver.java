@@ -36,20 +36,17 @@ public class ClientReceiver extends Thread {
         
         while ( true ) {
             try {
-                addLog( ClientReceiver.class.getName() + 
-                        ": waiting for new command" );
+                addLog( "waiting for new command" );
                 CommandData newCommand = ( CommandData ) input.readObject();
                 addCommand( new Command( Sources.Client, newCommand ) );
-                addLog( ClientReceiver.class.getName() + 
-                        ": added new command" );
+                addLog( "added new command" );
             } catch ( IOException | ClassNotFoundException ex ) {
                 break;
             }
         }
         
         releaseProcessor();
-        addLog( ClientReceiver.class.getName() + 
-                ": released" );
+        addLog( "released" );
         
     }
     
@@ -58,7 +55,10 @@ public class ClientReceiver extends Thread {
     private void releaseProcessor()
     { addCommand( new Command( Sources.Client, Commands.Disconnect, null ) ); }
     
-    private void addLog( String log ) { System.out.println( log ); }
+    private void addLog( String log ) 
+    { 
+        System.out.println( ClientReceiver.class.getName() + ": " + log );
+    }
     
     private ClientBase clientBase;
     private Socket client;
