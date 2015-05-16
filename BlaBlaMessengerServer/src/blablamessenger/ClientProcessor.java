@@ -109,6 +109,7 @@ public class ClientProcessor extends Thread {
             break;
             case RemoveFile:
                 addLog( "get remove file command" );
+                removeFile( command );
             break;
         }
     }
@@ -368,6 +369,18 @@ public class ClientProcessor extends Thread {
         FileId file = ( FileId ) command.Data;
         writeResult( new ResultData(ResultTypes.DownloadedFile, 
                 fileBase.download( file )) );
+    }
+    
+    private void removeFile( Command command ) 
+    {
+        FileId file = ( FileId ) command.Data;
+        deleteFromBase( file );
+        writeResult( new ResultData(ResultTypes.RemovedFile, file) );
+    }
+    private void deleteFromBase( FileId file )
+    {
+        fileBase.remove( file );
+        fileBase.removeFile( file );
     }
     
     private void writeResult( ResultData result )
