@@ -7,6 +7,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -39,6 +40,7 @@ public class ChatActivity extends ActionBarActivity {
     private DataStorage storage = null;
     private Cloud cloud = null;
     private Button sendMessageButton;
+    private ArrayAdapter<String> contactsAdapter = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +48,12 @@ public class ChatActivity extends ActionBarActivity {
         Log.d("MyLog", "onCreate called");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+
+        // Add List View
+        ListView contactList = (ListView)findViewById(R.id.contactsList);
+        String[] values = {"First", "Second"};
+        contactsAdapter = new ArrayAdapter<String>(this, R.layout.contact_list_item, values);
+        contactList.setAdapter(contactsAdapter);
 
         sendMessageButton = (Button)findViewById(R.id.sendMessage);
         sendMessageButton.setOnClickListener(new View.OnClickListener() {
@@ -140,7 +148,14 @@ public class ChatActivity extends ActionBarActivity {
                         resultField.setText(storage.contactId.Id.toString());
                     }
 
-                    ListView contactsList = (ListView)findViewById(R.id.contactsList);
+                    if (storage.contacts != null)
+                    {
+                        for (int i = 0; i < storage.contacts.Contacts.size(); ++i) {
+                            contactsAdapter.add(storage.contacts.Contacts.get(i).Name.Name);
+                        }
+                        contactsAdapter.notifyDataSetChanged();
+                    }
+//                    ListView contactsList = (ListView)findViewById(R.id.contactsList);
 //                    if (storage.contacts != null) {
 //                        contactsList.clearChoices();
 //                        for (int i = 0; i < storage.contacts.Contacts.size(); ++i) {
