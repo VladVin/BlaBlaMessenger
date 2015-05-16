@@ -64,4 +64,4 @@ Download File from the Storage:
 
 Remove file from the storage:
     input -- ComData{ command=RemoveFile, data=FileId }
-    output -- ResData{ resultType=RemovedFile, data=bool }
+    output -- ResData{ resultType=RemovedFile, data=FileId }
