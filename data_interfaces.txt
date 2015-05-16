@@ -56,7 +56,7 @@ Upload file to the storage:
             data=array of bytes of the file;
         }
     }
-    output -- ResData{ resultType=UploadedFile, data=bool }
+    output -- ResData{ resultType=UploadedFile, data=FileId }
 
 Download File from the Storage:
     input -- ComData{ command=DownloadFile, data=FileId }
