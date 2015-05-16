@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -134,20 +135,20 @@ public class ChatActivity extends ActionBarActivity {
                 @Override
                 public void run() {
                     TextView resultField = (TextView)findViewById(R.id.resultField);
-                        if (storage.contactId != null && storage.contactId.Id != null)
-                        {
-                            resultField.setText(storage.contactId.Id.toString());
-                        }
+                    if (storage.contactId != null && storage.contactId.Id != null)
+                    {
+                        resultField.setText(storage.contactId.Id.toString());
+                    }
 
                     ListView contactsList = (ListView)findViewById(R.id.contactsList);
-                    if (storage.contacts != null) {
-                        contactsList.clearChoices();
-                        for (int i = 0; i < storage.contacts.Contacts.size(); ++i) {
-                            TextView contactName = new TextView(getBaseContext());
-                            contactName.setText(storage.contacts.Contacts.indexOf(i));
-                            contactsList.addView(contactName);
-                        }
-                    }
+//                    if (storage.contacts != null) {
+//                        contactsList.clearChoices();
+//                        for (int i = 0; i < storage.contacts.Contacts.size(); ++i) {
+//                            TextView contactName = new TextView(getBaseContext());
+//                            contactName.setText(storage.contacts.Contacts.get(i).Name.Name);
+//                            contactsList.addView(contactName);
+//                        }
+//                    }
                 }
             });
         }
