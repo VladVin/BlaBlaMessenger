@@ -105,6 +105,7 @@ public class ClientProcessor extends Thread {
             break;
             case DownloadFile:
                 addLog( "get download file command" );
+                downloadFile( command );
             break;
             case RemoveFile:
                 addLog( "get remove file command" );
@@ -360,6 +361,13 @@ public class ClientProcessor extends Thread {
     {
         fileBase.addFile( new FileIdNamePair( id, file.Name ) );
         fileBase.upload( id, file.Data );
+    }
+    
+    private void downloadFile( Command command ) 
+    {
+        FileId file = ( FileId ) command.Data;
+        writeResult( new ResultData(ResultTypes.DownloadedFile, 
+                fileBase.download( file )) );
     }
     
     private void writeResult( ResultData result )
