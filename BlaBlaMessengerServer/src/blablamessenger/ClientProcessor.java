@@ -45,8 +45,7 @@ public class ClientProcessor extends Thread {
     public void run()
     {
         while ( running ) {
-            addLog( ClientProcessor.class.getName() + 
-                    ": waiting for new command" );
+            addLog( "waiting for new command" );
             processCommand( getCommand() );
         }
     }    
@@ -58,60 +57,48 @@ public class ClientProcessor extends Thread {
                 registerContact( command );
             break;
             case Disconnect:
-                addLog( ClientProcessor.class.getName() + 
-                        ": get disconnect command" );
+                addLog( "get disconnect command" );
                 disconnect();
             break;
             case RefreshContacts:
-                addLog( ClientProcessor.class.getName() + 
-                        ": get refresh contacts command" );
+                addLog( "get refresh contacts command" );
                 refreshContacts();
             break;
             case CreateConference:
-                addLog( ClientProcessor.class.getName() + 
-                        ": get create conference command" );
+                addLog( "get create conference command" );
                 createConference( command );
             break;
             case AddToConference:
-                addLog( ClientProcessor.class.getName() + 
-                        ": get add to conference command" );
+                addLog( "get add to conference command" );
                 addToConference( command );
             break;
             case RemoveFromConference:
-                addLog( ClientProcessor.class.getName() + 
-                        ": get remove from conference command" );
+                addLog( "get remove from conference command" );
                 removeFromConference( command );
             break;
             case DeleteConference:
-                addLog( ClientProcessor.class.getName() + 
-                        ": get delete conference command" );
+                addLog( "get delete conference command" );
                 deleteConference( command );
             break;
             case SendMessageToContact:
-                addLog( ClientProcessor.class.getName() + 
-                        ": get send message to contact command" );
+                addLog( "get send message to contact command" );
                 sendMessageToContact( command );
             break;
             case SendMessageToConference:
-                addLog( ClientProcessor.class.getName() + 
-                        ": get send message to conference command" );
+                addLog( "get send message to conference command" );
                 sendMessageToConference( command );
             break;
             case RefreshStorage:
-                addLog( ClientProcessor.class.getName() + 
-                        ": get refresh storage command" );
+                addLog( "get refresh storage command" );
             break;
             case UploadFile:
-                addLog( ClientProcessor.class.getName() + 
-                        ": get upload file command" );
+                addLog( "get upload file command" );
             break;
             case DownloadFile:
-                addLog( ClientProcessor.class.getName() + 
-                        ": get download file command" );
+                addLog( "get download file command" );
             break;
             case RemoveFile:
-                addLog( ClientProcessor.class.getName() + 
-                        ": get remove file command" );
+                addLog( "get remove file command" );
             break;
         }
     }
@@ -127,44 +114,50 @@ public class ClientProcessor extends Thread {
     
     private void registerContact( Command command )
     {
-        ContactName name = ( ContactName ) command.Data;
-        Contact newContact = new Contact( name );
-        myContact = newContact.Id;
-        
-        addLog( ClientProcessor.class.getName() +
-                ": name = " +
-                name.Name +
-                " receiver = " +
-                myReceiver.toString() );
-        
-        clientBase.addContact( newContact );
-        clientBase.addClient( myContact, myReceiver );
-        
-        ResultData result = new ResultData( ResultTypes.ContactId, 
-                myContact );
-        writeResult( result );
+        if ( !registered ) {
+            registered = true;
+            
+            ContactName name = ( ContactName ) command.Data;
+            Contact newContact = new Contact( name );
+            myContact = newContact.Id;
+
+            addLog( "name = " +
+                    name.Name +
+                    " receiver = " +
+                    myReceiver.toString() );
+
+            clientBase.addContact( newContact );
+            clientBase.addClient( myContact, myReceiver );
+
+            ResultData result = new ResultData( ResultTypes.ContactId, 
+                    myContact );
+            writeResult( result );
+        }
     }
     
     private void disconnect()
     {
-        disconnectClientReceiver();
-        deleteFromBase();
+        if ( registered ) {
+            disconnectClientReceiver();
+            deleteFromBase();
         
-        myConferences.stream().forEach( (ConferenceId conference) -> {
-            Conference myConference = clientBase.getConference( conference );
-            if ( myConference != null ) {
-                synchronized ( myConference ) {
-                    myConference.Members.remove( myContact );
-                    if ( myConference.Members.isEmpty() ) {
-                        clientBase.removeConference( conference );
-                    } else {
-                        notifyRemovedMember( myConference, myContact );
+            myConferences.stream().forEach( (ConferenceId conference) -> {
+                Conference myConference = 
+                        clientBase.getConference( conference );
+                if ( myConference != null ) {
+                    synchronized ( myConference ) {
+                        myConference.Members.remove( myContact );
+                        if ( myConference.Members.isEmpty() ) {
+                            clientBase.removeConference( conference );
+                        } else {
+                            notifyRemovedMember( myConference, myContact );
+                        }
                     }
                 }
-            }
-        });
-  
-        running = false;
+            });
+
+            running = false;           
+        }
     }
     private void deleteFromBase()
     {
@@ -192,35 +185,45 @@ public class ClientProcessor extends Thread {
     
     private void refreshContacts()
     {
-        Contacts contacts = new Contacts( clientBase.getContacts() );
-        ResultData result = new ResultData( ResultTypes.UpdatedContacts,
+        if ( registered ) {
+            Contacts contacts = new Contacts( clientBase.getContacts() );
+            
+            contacts.Contacts.add( new Contact( new ContactName( "Gladilov Gleb" ) ) );
+            
+            
+            ResultData result = new ResultData( ResultTypes.UpdatedContacts,
                 contacts );
-        
-        writeResult( result );
+            
+            writeResult( result );           
+        }
     }
     
     private void createConference( Command command )
     {
-        Conference newConference = 
-            new Conference( (Conference) command.Data );
-        myConferences.add( newConference.Id );
-        
-        switch( command.Source ) {
-            case Client:
-                clientBase.addConference( newConference );
-                synchronized ( newConference ) {
-                    newConference.Members.remove( myContact );
-                    notifyNewConference( command, newConference );
-                    newConference.Members.add( myContact );
-                }
+        if ( registered ) {
+            Conference newConference = 
+                new Conference( (Conference) command.Data );
+            myConferences.add( newConference.Id );
 
-                writeResult( new ResultData(ResultTypes.CreatedConference,
-                    newConference.Id) );
-            break;
-            case Server:
-                writeResult( new ResultData(ResultTypes.AddedToNewConference,
-                    newConference) );
-            break;
+            switch( command.Source ) {
+                case Client:
+                    clientBase.addConference( newConference );
+                    synchronized ( newConference ) {
+                        newConference.Members.remove( myContact );
+                        notifyNewConference( command, newConference );
+                        newConference.Members.add( myContact );
+                    }
+
+                    writeResult( new ResultData(
+                            ResultTypes.CreatedConference,
+                            newConference.Id) );
+                break;
+                case Server:
+                    writeResult( new ResultData(
+                            ResultTypes.AddedToNewConference,
+                            newConference) );
+                break;
+            }          
         }
     }
     private void notifyNewConference( Command command, Conference conference ) 
@@ -228,24 +231,27 @@ public class ClientProcessor extends Thread {
     
     private void addToConference( Command command )
     {
-        ContactConfPair add = ( ContactConfPair ) command.Data;
-        
-        if ( add.Contact == myContact ) {
-            Conference conference = clientBase.getConference( add.Conference );
-            
-            if ( conference != null ) {
-                myConferences.add( add.Conference );
-                
-                synchronized ( conference ) {
-                    notifyNewMember( command, conference );
-                    conference.Members.add( myContact );                  
-                    writeResult( new ResultData(ResultTypes.AddedConference,
-                        conference) );
+        if ( registered ) {
+            ContactConfPair add = ( ContactConfPair ) command.Data;
+
+            if ( add.Contact == myContact ) {
+                Conference conference = 
+                        clientBase.getConference( add.Conference );
+
+                if ( conference != null ) {
+                    myConferences.add( add.Conference );
+
+                    synchronized ( conference ) {
+                        notifyNewMember( command, conference );
+                        conference.Members.add( myContact );                  
+                        writeResult( new ResultData(ResultTypes.AddedConference,
+                            conference) );
+                    }
                 }
-            }
-        } else {
-            writeResult( new ResultData(ResultTypes.AddedToConference,
-                add) );
+            } else {
+                writeResult( new ResultData(ResultTypes.AddedToConference,
+                    add) );
+            }            
         }
     }
     private void notifyNewMember( Command command, Conference conference )
@@ -253,21 +259,23 @@ public class ClientProcessor extends Thread {
     
     private void removeFromConference( Command command ) 
     {
-        ContactConfPair remove = ( ContactConfPair ) command.Data;
-        if ( remove.Contact == myContact ) {
-            removeMyContactFromConference( remove.Conference );
-        }
-        
-        if ( command.Source == Sources.Client ) {
-            Conference conference =  
-                clientBase.getConference( remove.Conference );
-            if ( conference != null ) {
-                notifyRemovedMember( conference, remove.Contact );
+        if ( registered ) {
+            ContactConfPair remove = ( ContactConfPair ) command.Data;
+            if ( remove.Contact == myContact ) {
+                removeMyContactFromConference( remove.Conference );
             }
+
+            if ( command.Source == Sources.Client ) {
+                Conference conference =  
+                    clientBase.getConference( remove.Conference );
+                if ( conference != null ) {
+                    notifyRemovedMember( conference, remove.Contact );
+                }
+            }
+
+            writeResult( new ResultData( ResultTypes.RemovedFromConference,
+                remove ) );           
         }
-        
-        writeResult( new ResultData( ResultTypes.RemovedFromConference,
-            remove ) );
     }
     private void removeMyContactFromConference( ConferenceId conference )
     {
@@ -285,26 +293,31 @@ public class ClientProcessor extends Thread {
     }
     
     
-    private void deleteConference( Command command ) {
-        ConferenceId remove = ( ConferenceId ) command.Data;
-        myConferences.remove( remove );
-        
-        switch ( command.Source ) {
-            case Client:
-                Conference conference = clientBase.removeConference( remove );
-                if ( conference != null ) {
-                    synchronized ( conference ) {
-                        conference.Members.remove( myContact );
-                        notifyDeleteConference( command, conference );
-                    }
+    private void deleteConference( Command command ) 
+    {
+        if ( registered ) {
+            ConferenceId remove = ( ConferenceId ) command.Data;
+            myConferences.remove( remove );
+
+            switch ( command.Source ) {
+                case Client:
+                    Conference conference = 
+                            clientBase.removeConference( remove );
+                    if ( conference != null ) {
+                        synchronized ( conference ) {
+                            conference.Members.remove( myContact );
+                            notifyDeleteConference( command, conference );
+                        }
+                        writeResult( new ResultData(
+                                ResultTypes.DeletedConference,
+                                remove) );
+                   }
+                break;
+                case Server:
                     writeResult( new ResultData(ResultTypes.DeletedConference,
-                        remove) );
-               }
-            break;
-            case Server:
-                writeResult( new ResultData(ResultTypes.DeletedConference,
-                        remove) );
-            break;
+                            remove) );
+                break;
+            }          
         }
     }
     private void notifyDeleteConference( Command command, 
@@ -313,38 +326,42 @@ public class ClientProcessor extends Thread {
     
     private void sendMessageToContact( Command command ) 
     {
-        ContactMessagePair send = ( ContactMessagePair ) command.Data;
-        if ( command.Source == Sources.Client ) {
-            clientBase.getClient( send.Contact ).addCommand( new Command
-                (   Sources.Server,
-                    Commands.SendMessageToContact,
-                    new ContactMessagePair(myContact, send.Message)
-                ) );       
-        } 
-        
-        writeResult( new ResultData(ResultTypes.Message,
-            send) );
+        if ( registered ) {
+            ContactMessagePair send = ( ContactMessagePair ) command.Data;
+            if ( command.Source == Sources.Client ) {
+                clientBase.getClient( send.Contact ).addCommand( new Command
+                    (   Sources.Server,
+                        Commands.SendMessageToContact,
+                        new ContactMessagePair(myContact, send.Message)
+                    ) );       
+            } 
+
+            writeResult( new ResultData(ResultTypes.Message,
+                send) );            
+        }
     }
     
     
     private void sendMessageToConference( Command command ) 
     {
-        ContactConfMessagePair send = 
-                ( ContactConfMessagePair ) command.Data;
-        switch ( command.Source ) {
-            case Client:
-                Conference conference = 
-                    clientBase.getConference( send.Message.Destination );
-                if ( conference != null ) {
-                    synchronized ( conference ) {
-                        notifyMessage( command, conference );
-                    }
-                }               
-            break;
-            case Server:
-                writeResult( new ResultData(ResultTypes.Message, send) );
-            break;
-        }     
+        if ( registered ) {
+            ContactConfMessagePair send = 
+                    ( ContactConfMessagePair ) command.Data;
+            switch ( command.Source ) {
+                case Client:
+                    Conference conference = 
+                        clientBase.getConference( send.Message.Destination );
+                    if ( conference != null ) {
+                        synchronized ( conference ) {
+                            notifyMessage( command, conference );
+                        }
+                    }               
+                break;
+                case Server:
+                    writeResult( new ResultData(ResultTypes.Message, send) );
+                break;
+            }             
+        }    
     }
     private void notifyMessage( Command command, Conference conference )
     { notifyMembers( new Command(Sources.Server, command), conference ); }
@@ -368,7 +385,10 @@ public class ClientProcessor extends Thread {
         }        
     }
     
-    private void addLog( String log ) { System.out.println( log ); }
+    private void addLog( String log ) 
+    { 
+        System.out.println( ClientProcessor.class.getName() + ": " + log );
+    }
     
     private ClientBase clientBase;
     private Socket socket;
@@ -378,6 +398,7 @@ public class ClientProcessor extends Thread {
     private ClientReceiver myReceiver;
     
     private boolean running = true;
+    private boolean registered = false;
     
     private ConcurrentLinkedQueue< Command > commands = 
             new ConcurrentLinkedQueue<>();

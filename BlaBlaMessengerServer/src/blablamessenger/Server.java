@@ -26,7 +26,7 @@ public class Server extends Thread {
         public Contact removeContact( ContactId contact ) 
         { return contacts.remove( contact ); }
         public ArrayList< Contact > getContacts()
-        { return ( ArrayList< Contact > ) contacts.elements(); }
+        { return new ArrayList<>( contacts.values() ); }
         
         public void addConference( Conference conference )
         { conferences.put( conference.Id, conference ); }
@@ -53,14 +53,14 @@ public class Server extends Thread {
     @Override
     public void run()
     {
-        addLog( Server.class.getName() + ": server started" );
+        addLog( "server started" );
         try ( ServerSocket serverSocket = new ServerSocket( port ) ) {
             serverSocket.setSoTimeout( CONNECTION_TIMEOUT );
             
             while ( !this.isInterrupted() ) {
                 try {
                     Socket newClient = serverSocket.accept();
-                    addLog( Server.class.getName() + ": waited new client" );
+                    addLog( "waited new client" );
                     new ClientReceiver( clientBase, newClient ).start();
                 } catch ( SocketTimeoutException e ) {}
             }
@@ -76,7 +76,7 @@ public class Server extends Thread {
     
     private void release( ServerSocket socket )
     {
-        addLog( Server.class.getName() + ": server shutting down" );
+        addLog( "server shutting down" );
         try {
             socket.close();
         } catch (IOException ex) {
@@ -90,10 +90,13 @@ public class Server extends Thread {
                     Commands.Disconnect, null ) );
         });
         
-        addLog( Server.class.getName() + ": server is off" );
+        addLog( "server is off" );
     }
     
-    private void addLog( String log ) { System.out.println( log ); }
+    private void addLog( String log ) 
+    { 
+        System.out.println( Server.class.getName() + ": " + log );
+    }
     
     private final int port = 4444;
     private ClientBase clientBase = new ClientBase();
