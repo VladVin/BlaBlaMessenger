@@ -51,7 +51,7 @@ public class DataReceiver extends Thread {
             if (result != null) resDataQueue.add(result);
             synchronized (resDataQueue)
             {
-                resDataQueue.notify();
+                resDataQueue.notifyAll();
             }
         }
 

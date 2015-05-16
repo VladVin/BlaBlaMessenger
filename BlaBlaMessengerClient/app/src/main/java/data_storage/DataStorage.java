@@ -1,5 +1,7 @@
 package data_storage;
 
+import android.util.Log;
+
 import data_structures.ContactId;
 import data_structures.Contacts;
 import data_structures.ResultData;
@@ -18,10 +20,13 @@ public class DataStorage {
         {
             case ContactId:
                 contactId = (ContactId)resData.Data;
+                Log.d("DataStorage", "ContactId received");
                 break;
             case UpdatedContacts:
                 contacts = (Contacts)resData.Data;
+                Log.d("DataStorage", "Contacts received");
                 break;
+
         }
     }
 }
