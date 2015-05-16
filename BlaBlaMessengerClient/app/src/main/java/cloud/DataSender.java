@@ -47,23 +47,24 @@ public class DataSender extends Thread {
                 catch (InterruptedException e) {
                     // TODO: Handle the exception
                 }
-            }
-            try
-            {
-                objOutStream.writeObject(comData);
-                objOutStream.flush();
-            }
-            catch(IOException io)
-            {
-                // TODO: Handle the exception
+
+                try
+                {
+                    objOutStream.writeObject(comData);
+                    objOutStream.flush();
+                }
+                catch(IOException io)
+                {
+                    // TODO: Handle the exception
+                }
             }
         }
     }
 
     public void sendData(CommandData cData) throws DataSenderException {
-        comData = cData;
         synchronized (dataSendingNotifier) {
-            dataSendingNotifier.notify();
+            comData = cData;
+            dataSendingNotifier.notifyAll();
         }
     }
 
