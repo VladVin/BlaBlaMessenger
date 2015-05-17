@@ -62,7 +62,7 @@ public class DataSender extends Thread {
         }
     }
 
-    public void sendData(CommandData cData) throws DataSenderException {
+    public void sendData(CommandData cData){
         synchronized (dataSendingNotifier) {
             comData = cData;
             dataSendingNotifier.notifyAll();

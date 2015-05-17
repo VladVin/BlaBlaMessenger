@@ -13,6 +13,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
 import cloud.Cloud;
+import data_structures.CommandData;
+import data_structures.Commands;
+import data_structures.ContactName;
 import list_adapters_and_updaters.CloudCreator;
 
 import static android.widget.Toast.LENGTH_LONG;
@@ -20,7 +23,7 @@ import static android.widget.Toast.makeText;
 
 
 public class LoginActivity extends ActionBarActivity {
-    public final static String EXTRA_MESSAGE = "com.vladvin.blabladmessengerclient.MESSAGE";
+    public final static String USERNAME_MESSAGE = "com.vladvin.blabladmessengerclient.MESSAGE";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,8 +41,9 @@ public class LoginActivity extends ActionBarActivity {
                     if (GeneralData.cloud != null) {
                         String userName = ((EditText)findViewById(R.id.nameField)).getText().toString();
                         if (userName.trim().length() != 0) {
+                            CommandData registerData = new CommandData(Commands.RegisterContact, new ContactName(userName));
+                            GeneralData.cloud.requestData(registerData);
                             Intent intent = new Intent(v.getContext(), ChatActivity.class);
-                            intent.putExtra(EXTRA_MESSAGE, userName);
                             startActivity(intent);
                             finish();
                         }

@@ -88,13 +88,8 @@ public class Cloud extends Thread {
         }
     }
 
-    public void requestData(final CommandData comData) throws CloudException {
-        try {
-            dataSender.sendData(comData);
-        }
-        catch(DataSenderException e) {
-            throw new CloudException(e.getMessage());
-        }
+    public void requestData(final CommandData comData){
+        dataSender.sendData(comData);
     }
 
     public DataStorage getStorage() {
