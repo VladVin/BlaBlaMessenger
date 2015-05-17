@@ -25,6 +25,8 @@ public class ChatActivity extends ActionBarActivity {
 
     private Cloud cloud = null;
     private ContactListAdapter contactsAdapter = null;
+    private DataUpdaterTask dataUpdaterTask = null;
+    private CommandSenderTask commandSenderTask = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,10 +44,12 @@ public class ChatActivity extends ActionBarActivity {
         contactList.setAdapter(contactsAdapter);
 
         // Start data updater
-        new DataUpdaterTask(cloud).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        dataUpdaterTask = new DataUpdaterTask(cloud);
+        dataUpdaterTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         // Start command sender
-        new CommandSenderTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        commandSenderTask = new CommandSenderTask();
+        commandSenderTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     @Override
@@ -68,6 +72,12 @@ public class ChatActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onDestroy() {
+        dataUpdaterTask.cancel(true);
+        commandSenderTask.cancel(true);
     }
 
     private void showError(final String text){
@@ -123,7 +133,7 @@ public class ChatActivity extends ActionBarActivity {
 
         @Override
         protected Void doInBackground(Void... params){
-            while (true)
+            while (!isCancelled())
             {
                 if (cloud != null) {
                     DataStorage storage = cloud.getStorage();
@@ -140,6 +150,7 @@ public class ChatActivity extends ActionBarActivity {
                     }
                 }
             }
+            return null;
         }
 
         private void updateData(final DataStorage storage)
