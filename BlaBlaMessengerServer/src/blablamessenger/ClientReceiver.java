@@ -1,8 +1,9 @@
 package blablamessenger;
 
 import blablamessenger.Server.ClientBase;
-
 import blablamessenger.Command.Sources;
+import blablamessenger.Server.FileBase;
+
 import data_structures.CommandData;
 import data_structures.Commands;
 
@@ -16,10 +17,12 @@ import java.util.logging.Logger;
 public class ClientReceiver extends Thread {
     public void addCommand( Command command ) { commands.add( command ); }
 
-    public ClientReceiver( ClientBase base, Socket newClient )
+    public ClientReceiver( ClientBase clientBase, FileBase fileBase, 
+            Socket newClient )
     {
-        clientBase = base;
+        this.clientBase = clientBase;
         client = newClient;
+        this.fileBase = fileBase;
         
         try {
             input = new ObjectInputStream( client.getInputStream() );
@@ -38,8 +41,14 @@ public class ClientReceiver extends Thread {
             try {
                 addLog( "waiting for new command" );
                 CommandData newCommand = ( CommandData ) input.readObject();
-                addCommand( new Command( Sources.Client, newCommand ) );
-                addLog( "added new command" );
+                if ( registered ) {
+                    addCommand( new Command( Sources.Client, newCommand ) );
+                    addLog( "added new command" );                    
+                } else if ( newCommand.Command == Commands.RegisterContact ) {
+                    registered = true;
+                    addCommand( new Command( Sources.Client, newCommand ) );
+                    addLog( "added new command" );
+                }
             } catch ( IOException | ClassNotFoundException ex ) {
                 break;
             }
@@ -51,7 +60,10 @@ public class ClientReceiver extends Thread {
     }
     
     private void createProcessor()
-    { new ClientProcessor( clientBase, client, this, commands ).start(); }
+    { 
+        new ClientProcessor( clientBase, fileBase, client, this, commands ).
+            start();
+    }
     private void releaseProcessor()
     { addCommand( new Command( Sources.Client, Commands.Disconnect, null ) ); }
     
@@ -61,9 +73,11 @@ public class ClientReceiver extends Thread {
     }
     
     private ClientBase clientBase;
+    private FileBase fileBase;
     private Socket client;
     
     private ObjectInputStream input;
     private ConcurrentLinkedQueue< Command > commands = 
             new ConcurrentLinkedQueue<>();
+    private boolean registered = false;
 }
