@@ -13,28 +13,12 @@
         android:layout_marginTop="58dp"
         android:layout_centerHorizontal="true" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="New Text"
-        android:id="@+id/resultField"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="New Text"
-        android:id="@+id/contactsText"
-        android:layout_alignTop="@+id/resultField"
-        android:layout_toEndOf="@+id/resultField"/>
-
     <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/contactsList"
-        android:layout_below="@+id/resultField"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="26dp" />
+        android:layout_marginTop="26dp"
+        android:layout_centerVertical="true" />
 
 </RelativeLayout>

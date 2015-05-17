@@ -13,7 +13,7 @@ import data_structures.ResultData;
  * Created by VladVin on 11.05.2015.
  */
 public class Cloud extends Thread {
-    private static final String ipAddress = "192.168.137.138";
+    private static final String ipAddress = "192.168.0.41";
     private static final int port = 4444;
     private Socket socket = null;
     private final ConcurrentLinkedQueue<ResultData> resDataQueue;
@@ -22,9 +22,9 @@ public class Cloud extends Thread {
     private final DataStorage storage;
     private boolean running = false;
 
-    public Cloud(DataStorage storage) throws CloudException {
+    public Cloud() throws CloudException {
         this.resDataQueue = new ConcurrentLinkedQueue<ResultData>();
-        this.storage = storage;
+        this.storage = new DataStorage();
 
         connect();
     }
@@ -95,6 +95,10 @@ public class Cloud extends Thread {
         catch(DataSenderException e) {
             throw new CloudException(e.getMessage());
         }
+    }
+
+    public DataStorage getStorage() {
+        return storage;
     }
 
     public void cancel() {

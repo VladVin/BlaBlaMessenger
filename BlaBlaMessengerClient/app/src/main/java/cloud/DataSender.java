@@ -52,6 +52,7 @@ public class DataSender extends Thread {
                 {
                     objOutStream.writeObject(comData);
                     objOutStream.flush();
+                    Log.d("DataSender", "Command sent");
                 }
                 catch(IOException io)
                 {
