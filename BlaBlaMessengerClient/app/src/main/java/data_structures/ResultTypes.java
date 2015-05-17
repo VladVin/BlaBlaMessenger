@@ -15,5 +15,6 @@ public enum ResultTypes implements Serializable{
     UpdatedFiles,
     UploadedFile,
     DownloadedFile,
-    RemovedFile
+    RemovedFile,
+    None
 }
