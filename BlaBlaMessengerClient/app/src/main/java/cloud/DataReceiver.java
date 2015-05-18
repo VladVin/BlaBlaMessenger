@@ -48,10 +48,12 @@ public class DataReceiver extends Thread {
                 Log.d("DataReceiver", "Read object exception");
                 // TODO: Handle the exception
             }
-            if (result != null) resDataQueue.add(result);
-            synchronized (resDataQueue)
-            {
-                resDataQueue.notifyAll();
+            if (result != null) {
+                resDataQueue.add(result);
+                synchronized (resDataQueue)
+                {
+                    resDataQueue.notifyAll();
+                }
             }
         }
 
