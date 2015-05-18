@@ -7,29 +7,20 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.EditText;
 
 import android.util.Log;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.io.IOException;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-
 import cloud.Cloud;
 import cloud.CloudException;
-import cloud.DataSender;
-import cloud.DataSenderException;
 import data_storage.DataStorage;
 import data_structures.CommandData;
 import data_structures.Commands;
 import data_structures.Contact;
-import data_structures.ContactName;
+import data_structures.ContactId;
 import list_adapters_and_updaters.ContactListAdapter;
 
 import static android.widget.Toast.*;
@@ -37,9 +28,10 @@ import static android.widget.Toast.*;
 public class ChatActivity extends ActionBarActivity {
 
     private Cloud cloud = null;
-    private Button sendMessageButton;
     private ContactListAdapter contactsAdapter = null;
-    private String userName = null;
+    private DataUpdaterTask dataUpdaterTask = null;
+    private CommandSenderTask commandSenderTask = null;
+    private ContactId myContactId = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,40 +40,31 @@ public class ChatActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        // Receive the user name
-        Intent loginIntent = getIntent();
-        userName = loginIntent.getStringExtra(LoginActivity.EXTRA_MESSAGE);
-
         // Take the cloud
         cloud = GeneralData.cloud;
 
         // Add List View
-        ListView contactList = (ListView)findViewById(R.id.contactsList);
+        final ListView contactList = (ListView)findViewById(R.id.contactsList);
         contactsAdapter = new ContactListAdapter(this, null);
         contactList.setAdapter(contactsAdapter);
 
-        new DataUpdaterTask(cloud).execute();
+        // Start data updater
+        dataUpdaterTask = new DataUpdaterTask(cloud);
+        dataUpdaterTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-        sendMessageButton = (Button)findViewById(R.id.sendMessage);
-        sendMessageButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                new Thread()
-                {
-                    public void run() {
-                        CommandData comData = new CommandData(Commands.RegisterContact, new ContactName(userName));
-                        CommandData queryContacts = new CommandData(Commands.RefreshContacts, null);
-                        try {
-                            cloud.requestData(comData);
-                            cloud.requestData(queryContacts);
-                        }
-                        catch (CloudException e) {
-                            showMessage("Cloud: " + e.getMessage());
-                        }
-                        catch (NullPointerException e) {
-                            showMessage("Cloud has not been created yet");
-                        }
-                    }
-                }.start();
+        // Start command sender
+        commandSenderTask = new CommandSenderTask();
+        commandSenderTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+        // Listeners
+        contactList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Contact contact = (Contact)contactList.getItemAtPosition(position);
+                GeneralData.conversationContactsPair = new GeneralData.ConversationContactsPair(myContactId, contact.Id);
+                Intent intent = new Intent(getBaseContext(), ConversationActivity.class);
+                startActivity(intent);
+                finish();
             }
         });
     }
@@ -108,6 +91,13 @@ public class ChatActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onDestroy() {
+        dataUpdaterTask.cancel(false);
+        commandSenderTask.cancel(false);
+        super.onDestroy();
+    }
+
     private void showError(final String text){
         runOnUiThread(new Runnable() {
             public void run() {
@@ -126,6 +116,32 @@ public class ChatActivity extends ActionBarActivity {
         });
     }
 
+    private class CommandSenderTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            while (!isCancelled()) {
+                CommandData queryContacts = new CommandData(Commands.RefreshContacts, null);
+                try {
+                    cloud.requestData(queryContacts);
+                }
+                catch (NullPointerException e) {
+                    showMessage("Cloud has not been created yet");
+                }
+
+                try
+                {
+                    Thread.sleep(100);
+                }
+                catch (InterruptedException e)
+                {
+                    return null;
+                }
+            }
+            return null;
+        }
+    }
+
     private class DataUpdaterTask extends AsyncTask<Void, Void, Void> {
         private Cloud cloud;
 
@@ -135,7 +151,7 @@ public class ChatActivity extends ActionBarActivity {
 
         @Override
         protected Void doInBackground(Void... params){
-            while (true)
+            while (!isCancelled())
             {
                 if (cloud != null) {
                     DataStorage storage = cloud.getStorage();
@@ -152,6 +168,7 @@ public class ChatActivity extends ActionBarActivity {
                     }
                 }
             }
+            return null;
         }
 
         private void updateData(final DataStorage storage)
@@ -161,6 +178,9 @@ public class ChatActivity extends ActionBarActivity {
                 public void run() {
                     if (storage != null) {
                         switch (storage.whatUpdated()) {
+                            case ContactId:
+                                myContactId = storage.getContactId();
+                                break;
                             case UpdatedContacts:
                                 if (storage.getContacts() != null) {
                                     contactsAdapter.updateContacts(storage.getContacts().Contacts);
@@ -171,6 +191,5 @@ public class ChatActivity extends ActionBarActivity {
                 }
             });
         }
-
     }
 }
