@@ -6,6 +6,8 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 
 import android.util.Log;
@@ -17,6 +19,8 @@ import cloud.CloudException;
 import data_storage.DataStorage;
 import data_structures.CommandData;
 import data_structures.Commands;
+import data_structures.Contact;
+import data_structures.ContactId;
 import list_adapters_and_updaters.ContactListAdapter;
 
 import static android.widget.Toast.*;
@@ -27,6 +31,7 @@ public class ChatActivity extends ActionBarActivity {
     private ContactListAdapter contactsAdapter = null;
     private DataUpdaterTask dataUpdaterTask = null;
     private CommandSenderTask commandSenderTask = null;
+    private ContactId myContactId = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +44,7 @@ public class ChatActivity extends ActionBarActivity {
         cloud = GeneralData.cloud;
 
         // Add List View
-        ListView contactList = (ListView)findViewById(R.id.contactsList);
+        final ListView contactList = (ListView)findViewById(R.id.contactsList);
         contactsAdapter = new ContactListAdapter(this, null);
         contactList.setAdapter(contactsAdapter);
 
@@ -50,6 +55,18 @@ public class ChatActivity extends ActionBarActivity {
         // Start command sender
         commandSenderTask = new CommandSenderTask();
         commandSenderTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+        // Listeners
+        contactList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Contact contact = (Contact)contactList.getItemAtPosition(position);
+                GeneralData.conversationContactsPair = new GeneralData.ConversationContactsPair(myContactId, contact.Id);
+                Intent intent = new Intent(getBaseContext(), ConversationActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
     }
 
     @Override
@@ -76,8 +93,9 @@ public class ChatActivity extends ActionBarActivity {
 
     @Override
     protected void onDestroy() {
-        dataUpdaterTask.cancel(true);
-        commandSenderTask.cancel(true);
+        dataUpdaterTask.cancel(false);
+        commandSenderTask.cancel(false);
+        super.onDestroy();
     }
 
     private void showError(final String text){
@@ -160,6 +178,9 @@ public class ChatActivity extends ActionBarActivity {
                 public void run() {
                     if (storage != null) {
                         switch (storage.whatUpdated()) {
+                            case ContactId:
+                                myContactId = storage.getContactId();
+                                break;
                             case UpdatedContacts:
                                 if (storage.getContacts() != null) {
                                     contactsAdapter.updateContacts(storage.getContacts().Contacts);
@@ -170,6 +191,5 @@ public class ChatActivity extends ActionBarActivity {
                 }
             });
         }
-
     }
 }
