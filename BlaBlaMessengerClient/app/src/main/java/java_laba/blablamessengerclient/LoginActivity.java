@@ -1,6 +1,7 @@
 package java_laba.blablamessengerclient;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -30,19 +31,29 @@ public class LoginActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        CloudCreator cloudCreator = new CloudCreator();
+        if (GeneralData.cloud == null) {
+            try {
+                GeneralData.cloud = cloudCreator.execute().get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+
         ((Button)findViewById(R.id.signInButton)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    CloudCreator cloudCreator = new CloudCreator();
-                    if (GeneralData.cloud == null) {
-                        GeneralData.cloud = cloudCreator.execute().get();
-                    }
+//                try {
+
                     if (GeneralData.cloud != null) {
                         String userName = ((EditText)findViewById(R.id.nameField)).getText().toString();
                         if (userName.trim().length() != 0) {
+//                            new LoginThread(new ContactName(userName)).start();
                             CommandData registerData = new CommandData(Commands.RegisterContact, new ContactName(userName));
                             GeneralData.cloud.requestData(registerData);
+//                            Thread.sleep(3000);
                             Intent intent = new Intent(v.getContext(), ChatActivity.class);
                             startActivity(intent);
                             finish();
@@ -52,13 +63,13 @@ public class LoginActivity extends ActionBarActivity {
                         }
                     }
                     else {
-                        showMessage(cloudCreator.getCloudException().getMessage());
+                        //showMessage(cloudCreator.getCloudException().getMessage());
                     }
-                } catch (InterruptedException e) {
-                    showMessage("Cloud creation problem");
-                } catch (ExecutionException e) {
-                    showMessage("Cloud creation problem");
-                }
+//                } catch (InterruptedException e) {
+//                    showMessage("Cloud creation problem");
+//                } catch (ExecutionException e) {
+//                    showMessage("Cloud creation problem");
+//                }
             }
         });
     }
@@ -84,6 +95,19 @@ public class LoginActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private class LoginThread extends Thread {
+        private ContactName name = null;
+
+        public LoginThread(ContactName contactName) {
+            name = contactName;
+        }
+
+        public void run() {
+            CommandData registerData = new CommandData(Commands.RegisterContact, name);
+            GeneralData.cloud.requestData(registerData);
+        }
     }
 
     private void showError(final String text){

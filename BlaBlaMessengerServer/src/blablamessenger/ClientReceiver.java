@@ -41,7 +41,8 @@ public class ClientReceiver extends Thread {
             try {
                 addLog( "waiting for new command" );
                 CommandData newCommand = ( CommandData ) input.readObject();
-                if ( registered ) {
+                if ( registered && 
+                        newCommand.Command != Commands.RegisterContact ) {
                     addCommand( new Command( Sources.Client, newCommand ) );
                     addLog( "added new command" );                    
                 } else if ( newCommand.Command == Commands.RegisterContact ) {

@@ -162,8 +162,10 @@ public class ClientProcessor extends Thread {
     }
     private void deleteFromBase()
     {
-        clientBase.removeContact( myContact );
-        clientBase.removeClient( myContact );
+        if( myContact != null ){
+            clientBase.removeContact( myContact );
+            clientBase.removeClient( myContact );
+        }
     }
     private void disconnectClientReceiver()
     {
@@ -304,11 +306,28 @@ public class ClientProcessor extends Thread {
     {
         ContactMessagePair send = ( ContactMessagePair ) command.Data;
         if ( command.Source == Sources.Client ) {
-            clientBase.getClient( send.Contact ).addCommand( new Command
-                (   Sources.Server,
-                    Commands.SendMessageToContact,
-                    new ContactMessagePair(myContact, send.Message)
-                ) );       
+            ClientReceiver client = clientBase.getClient( send.Contact );
+            if ( client != null ) {
+                client.addCommand( new Command
+                    (   Sources.Server,
+                        Commands.SendMessageToContact,
+                        new ContactMessagePair(myContact, send.Message)
+                    ) );    
+            } else {
+                addLog( "client is null" );
+            }
+            
+            if ( send.Contact.Id != myContact.Id && myContact.Id != null ) {
+                addLog("is not I");
+            }
+            
+            addLog( "myContact = " + myContact.Id.toString() );
+            addLog( "send.Contact = " + send.Contact.Id.toString() );
+            
+            if ( myReceiver == null ) {
+                addLog( "myReceiver is null" );
+            }
+                   
         }
         writeResult( new ResultData(ResultTypes.Message, send) );            
     }

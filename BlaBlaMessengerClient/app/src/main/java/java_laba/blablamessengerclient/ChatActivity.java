@@ -56,6 +56,11 @@ public class ChatActivity extends ActionBarActivity {
         commandSenderTask = new CommandSenderTask();
         commandSenderTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
+        //Check the contact ID
+        if (GeneralData.conversationContactsPair != null && GeneralData.conversationContactsPair.me != null) {
+            myContactId = GeneralData.conversationContactsPair.me;
+        }
+
         // Listeners
         contactList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
