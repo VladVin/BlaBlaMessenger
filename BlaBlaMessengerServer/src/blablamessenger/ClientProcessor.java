@@ -575,7 +575,7 @@ public class ClientProcessor extends Thread {
     private final Socket socket;
     
     private ObjectOutputStream output;
-    private ContactId myContact;
+    private final ContactId myContact;
     private final ClientReceiver myReceiver;
     
     private final int CALLING_METHOD = 1;
@@ -583,5 +583,5 @@ public class ClientProcessor extends Thread {
     
     private ConcurrentLinkedQueue< Command > commands = 
             new ConcurrentLinkedQueue<>();
-    private ArrayList< ConferenceId > myConferences = new ArrayList<>();
+    private final ArrayList< ConferenceId > myConferences = new ArrayList<>();
 }

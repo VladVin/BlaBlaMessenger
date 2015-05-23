@@ -6,5 +6,5 @@ public class Contacts extends DataObject {
     public ArrayList< Contact > Contacts;
     
     public Contacts( ArrayList< Contact > contacts ) 
-    { Contacts = new ArrayList<>( contacts ); }
+    { Contacts = contacts; }
 }

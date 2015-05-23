@@ -47,11 +47,11 @@ public class Server extends Thread {
         public ClientReceiver getClient( ContactId contact )
         { return clients.get( contact.Id ); }
         
-        private ConcurrentHashMap< UUID, Contact > contacts = 
+        private final ConcurrentHashMap< UUID, Contact > contacts = 
                 new ConcurrentHashMap();
-        private ConcurrentHashMap< UUID, Conference > conferences =
+        private final ConcurrentHashMap< UUID, Conference > conferences =
                 new ConcurrentHashMap();
-        private ConcurrentHashMap< UUID, ClientReceiver > clients =
+        private final ConcurrentHashMap< UUID, ClientReceiver > clients =
                 new ConcurrentHashMap();
     }
    

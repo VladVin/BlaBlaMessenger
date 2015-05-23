@@ -76,10 +76,10 @@ public class ClientReceiver extends Thread {
         System.out.println( ClientReceiver.class.getName() + ": " + log );
     }
     
-    private ClientBase clientBase;
-    private FileBase fileBase;
-    private Socket client;
-    private ContactId myContact;
+    private final ClientBase clientBase;
+    private final FileBase fileBase;
+    private final Socket client;
+    private final ContactId myContact;
     
     private ObjectInputStream input;
     private ConcurrentLinkedQueue< Command > commands = 
