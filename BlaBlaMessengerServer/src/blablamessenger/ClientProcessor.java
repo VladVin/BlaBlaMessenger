@@ -126,47 +126,96 @@ public class ClientProcessor extends Thread {
     private void registerContact( Command command )
     { 
         ContactName name = ( ContactName ) command.Data;
-        Contact newContact = new Contact( name );
-        myContact = newContact.Id;
+        Contact newContact = new Contact( name, myContact );
 
         addToBase( newContact );
+        
+        if ( myContact == null || myContact.Id == null ) {
+            errorLog( "myContact is null" );
+        }
 
         writeResult( new ResultData( ResultTypes.ContactId, myContact ) );
     }
     private void addToBase( Contact contact )
     {
-        clientBase.addContact( contact );
-        clientBase.addClient( myContact, myReceiver );       
+        addMyContactToBase( contact );
+        addMyReceiverToBase();       
+    }
+    private void addMyContactToBase( Contact contact )
+    {
+        if ( myContact.Id != null ) {
+                clientBase.addContact( contact );
+        } else { errorLog( "myContact is null" ); }
+    }
+    private void addMyReceiverToBase()
+    {
+        if ( myContact.Id != null ) {
+            if ( myReceiver != null ) {
+                clientBase.addClient( myContact, myReceiver );                   
+            } else { errorLog( "myReceiver is null" ); }
+        } else { errorLog( "myContact is null" ); }
     }
     
     private void disconnect()
     {
         disconnectClientReceiver();
         deleteFromBase();
-
-        myConferences.stream().forEach( (ConferenceId conference) -> {
-            Conference myConference = clientBase.getConference( conference );
-            if ( myConference != null ) {
-                synchronized ( myConference ) {
-                    myConference.Members.remove( myContact );
-                    if ( myConference.Members.isEmpty() ) {
-                        clientBase.removeConference( conference );
-                    } else {
-                        notifyRemovedMember( myConference, myContact );
-                    }
-                }
-            }
-        });
-
+        deleteMyConferences();
         running = false;           
     }
     private void deleteFromBase()
     {
-        if( myContact != null ){
-            clientBase.removeContact( myContact );
-            clientBase.removeClient( myContact );
-        }
+        removeMyContactFromBase();
+        removeMyReceiverFromBase();
     }
+    private void deleteMyConferences()
+    {
+        myConferences.stream().forEach( ( ConferenceId conference ) -> {
+            if ( conference != null ) {
+                Conference myConference = 
+                        clientBase.getConference( conference );
+                if ( myConference != null ) {
+                    synchronized ( myConference ) {
+                        removeMeFromConference( myConference );
+                        if ( myConference.Members.isEmpty() ) {
+                            clientBase.removeConference( conference );
+                        } else {
+                            notifyRemoveMember( myConference, myContact );
+                        }
+                    }
+                }
+            }
+        });
+        myConferences.clear();
+    }
+    private void removeMeFromConference( Conference conference )
+    { 
+        if ( myContact.Id != null ) {
+            conference.Members.remove( myContact );  
+        } else { errorLog( "myContact is null" ); }
+    }
+    
+    private void addMeToConference( Conference conference )
+    { 
+        if ( myContact.Id != null ) {
+            conference.Members.add( myContact );  
+        } else { errorLog( "myContact is null" ); }
+    }
+    
+    private void removeMyContactFromBase()
+    { 
+        if ( myContact.Id != null ) {
+            clientBase.removeContact( myContact );  
+        } else { errorLog( "myContact is null" ); }
+    }
+    private void removeMyReceiverFromBase()
+    { 
+        if ( myReceiver != null ) {
+            clientBase.removeClient( myContact );  
+        } else { errorLog( "myReceiver is null" ); } 
+    }
+    
+    
     private void disconnectClientReceiver()
     {
         try {
@@ -176,7 +225,7 @@ public class ClientProcessor extends Thread {
                     log( Level.SEVERE, null, ex );
         }
     }
-    private void notifyRemovedMember( Conference conference, ContactId contact )
+    private void notifyRemoveMember( Conference conference, ContactId contact )
     {
         notifyMembers( new Command
                 (   Sources.Server, 
@@ -189,33 +238,48 @@ public class ClientProcessor extends Thread {
     private void refreshContacts()
     {
         Contacts contacts = new Contacts( clientBase.getContacts() );
+        contacts.Contacts.stream().forEach((Contact) -> {
+            addLog(Contact.Name.Name);
+        });
         writeResult( new ResultData( ResultTypes.UpdatedContacts, contacts ) );           
     }
     
     private void createConference( Command command )
     {
-        Conference newConference = new Conference( (Conference) command.Data );
+        Conference conference = (Conference) command.Data;
+        if ( conference.Members.isEmpty() ) {
+            errorLog( "empty conference" );
+            return;
+        }
+        
+        Conference newConference = new Conference( conference );
+        if ( newConference.Id == null ) {
+            errorLog( "id of new conference is null" );
+            return;
+        }
+        
         myConferences.add( newConference.Id );
-
-        switch( command.Source ) {
-            case Client:
-                clientBase.addConference( newConference );
-                synchronized ( newConference ) {
-                    newConference.Members.remove( myContact );
-                    notifyNewConference( command, newConference );
-                    newConference.Members.add( myContact );
-                }
-
-                writeResult( new ResultData(
-                        ResultTypes.CreatedConference,
-                        newConference.Id) );
-            break;
-            case Server:
-                writeResult( new ResultData(
-                        ResultTypes.AddedToNewConference,
-                        newConference) );
-            break;
-        }          
+        if ( command.Source == Sources.Client ) {
+            
+            clientBase.addConference( newConference );
+            synchronized ( newConference ) {
+                removeMeFromConference( newConference );
+                notifyNewConference( command, newConference );
+                addMeToConference( newConference );
+            }
+            
+            ResultData result = new ResultData( ResultTypes.CreatedConference,
+                newConference.Id );
+            writeResult( result );
+            
+        } else if ( command.Source == Sources.Server ) {
+            
+            ResultData res = new ResultData( ResultTypes.AddedToNewConference,
+                newConference );
+            writeResult( res );
+            
+        }
+              
     }
     private void notifyNewConference( Command command, Conference conference ) 
     { notifyMembers( new Command(Sources.Server, command), conference ); }
@@ -223,7 +287,59 @@ public class ClientProcessor extends Thread {
     private void addToConference( Command command )
     {
         ContactConfPair add = ( ContactConfPair ) command.Data;
-        if ( add.Contact == myContact ) {
+        if ( add.Contact.Id == null ) {
+            errorLog( "id of contact is null" );
+            return;
+        }
+        
+        if ( add.Conference.Id == null ) {
+            errorLog( "id of conference is null" );
+            return;
+        }
+        
+        if ( command.Source == Sources.Client ) {
+            
+            if ( add.Contact.Id.compareTo(myContact.Id) == 0 ) {
+                errorLog( "add to conference myself" );
+                return;
+            }
+            
+            Conference conference = clientBase.getConference( add.Conference );
+            if ( conference != null ) {
+                synchronized ( conference ) {
+                    notifyNewMember( command, conference );                    
+                }
+                ResultData result = 
+                    new ResultData( ResultTypes.AddedToConference, add );
+                writeResult( result );
+            } else { errorLog( "add to unknown conference" ); }
+            
+        } else if ( command.Source == Sources.Server ) {
+            
+            if ( add.Contact.Id.compareTo(myContact.Id) == 0 ) {
+                Conference newConference = 
+                    clientBase.getConference( add.Conference );
+                if ( newConference != null ) {
+                    myConferences.add( add.Conference );
+                    synchronized ( newConference ) {
+                        addMeToConference( newConference );
+                    }
+                    
+                    ResultData result = 
+                        new ResultData( ResultTypes.AddedConference, 
+                            newConference );
+                    writeResult( result );
+                    
+                } else { errorLog( "added to unknown conference" ); }
+            } else {
+                ResultData result = 
+                    new ResultData( ResultTypes.AddedToConference, add );
+                writeResult( result );
+            }
+              
+        }
+        
+        if ( add.Contact.Id.compareTo(myContact.Id) == 0 ) {
             Conference conference =  clientBase.getConference( add.Conference );
             if ( conference != null ) {
                 myConferences.add( add.Conference );
@@ -244,59 +360,66 @@ public class ClientProcessor extends Thread {
     private void removeFromConference( Command command ) 
     {
         ContactConfPair remove = ( ContactConfPair ) command.Data;
-        if ( remove.Contact == myContact ) {
-            removeMyContactFromConference( remove.Conference );
+        if ( remove.Conference.Id == null ) {
+            errorLog( "id of conference is null" );
+            return;
         }
-
-        if ( command.Source == Sources.Client ) {
-            Conference conference =  
-                clientBase.getConference( remove.Conference );
+        if ( remove.Contact.Id == null ) {
+            errorLog( "id of contact is null" );
+            return;
+        }
+        
+        Conference conference = clientBase.getConference( remove.Conference );
+        ResultData result = new ResultData( ResultTypes.RemovedFromConference,
+            remove );
+        
+        if ( remove.Contact.Id.compareTo(myContact.Id) == 0 ) {
+            myConferences.remove( remove.Conference );
             if ( conference != null ) {
-                notifyRemovedMember( conference, remove.Contact );
-            }
-        }
-
-        writeResult( new ResultData( ResultTypes.RemovedFromConference,
-            remove ) );           
-    }
-    private void removeMyContactFromConference( ConferenceId conference )
-    {
-        myConferences.remove( conference );
-        Conference myConference = clientBase.getConference( conference );
-        if ( myConference != null ) {
-            synchronized ( myConference ) {
-                myConference.Members.remove( myContact );
-                if ( myConference.Members.isEmpty() ) {
-                    clientBase.removeConference( conference );
+                synchronized ( conference ) {
+                    removeMeFromConference( conference );
+                    /* Если больше никого нет, то не оповещаю */
+                    if ( conference.Members.isEmpty() ) {
+                        clientBase.removeConference( remove.Conference );
+                        writeResult( result );
+                        return;
+                    }
                 }
-            }
-        }       
+            }           
+        }
+        
+        if ( command.Source == Sources.Client ) {
+            notifyRemoveMember( conference, remove.Contact );
+        }      
+        
+        writeResult( result );           
     }
-    
-    
+
     private void deleteConference( Command command ) 
     {
         ConferenceId remove = ( ConferenceId ) command.Data;
+        if ( remove.Id == null ) {
+            errorLog( "id of conference is null" );
+            return;
+        }
+        
         myConferences.remove( remove );
-
-        switch ( command.Source ) {
-            case Client:
-                Conference conference = clientBase.removeConference( remove );
-                if ( conference != null ) {
-                    synchronized ( conference ) {
-                        conference.Members.remove( myContact );
-                        notifyDeleteConference( command, conference );
-                    }
-                    writeResult( new ResultData(
-                            ResultTypes.DeletedConference,
-                            remove) );
-               }
-            break;
-            case Server:
-                writeResult( new ResultData(ResultTypes.DeletedConference,
-                    remove) );
-            break;
-        }          
+        if ( command.Source == Sources.Client ) {
+            Conference conference = clientBase.removeConference( remove );
+            if ( conference != null ) {
+                synchronized ( conference ) {
+                    removeMeFromConference( conference );
+                    notifyDeleteConference( command, conference );
+                }
+                ResultData result = 
+                    new ResultData( ResultTypes.DeletedConference, remove );
+                writeResult( result );
+           }            
+        } else if ( command.Source == Sources.Server ) {
+            ResultData result = 
+                new ResultData( ResultTypes.DeletedConference, remove );
+            writeResult( result );           
+        }         
     }
     private void notifyDeleteConference( Command command, 
             Conference conference )
@@ -305,6 +428,11 @@ public class ClientProcessor extends Thread {
     private void sendMessageToContact( Command command ) 
     {
         ContactMessagePair send = ( ContactMessagePair ) command.Data;
+        if ( send.Contact.Id == null ) {
+            errorLog( "id of contact is null" );
+            return;
+        }
+        
         if ( command.Source == Sources.Client ) {
             ClientReceiver client = clientBase.getClient( send.Contact );
             if ( client != null ) {
@@ -313,13 +441,7 @@ public class ClientProcessor extends Thread {
                         Commands.SendMessageToContact,
                         new ContactMessagePair(myContact, send.Message)
                     ) );    
-            } else {
-                addLog( "client is null" );
-            }
-            
-            if ( send.Contact.Id != myContact.Id && myContact.Id != null ) {
-                addLog("is not I");
-            }
+            } else { addLog( "client is null" ); }
             
             addLog( "myContact = " + myContact.Id.toString() );
             addLog( "send.Contact = " + send.Contact.Id.toString() );
@@ -336,30 +458,51 @@ public class ClientProcessor extends Thread {
     private void sendMessageToConference( Command command ) 
     {
         ContactConfMessagePair send = ( ContactConfMessagePair ) command.Data;
-        switch ( command.Source ) {
-            case Client:
-                Conference conference = 
-                    clientBase.getConference( send.Message.Destination );
-                if ( conference != null ) {
-                    synchronized ( conference ) {
-                        notifyMessage( command, conference );
-                    }
-                }               
-            break;
-            case Server:
-                writeResult( new ResultData(ResultTypes.Message, send) );
-            break;
-        }                
+        if ( send.Source.Id == null ) {
+            errorLog( "id of source is null" );
+            return;
+        }
+        
+        if ( send.Message.Destination.Id == null ) {
+            errorLog( "id of destination is null" );
+            return;
+        }
+        
+        if ( command.Source == Sources.Client ) {
+            
+            Conference conference = 
+                clientBase.getConference( send.Message.Destination );
+            if ( conference != null ) {
+                synchronized ( conference ) {
+                    notifyMessage( command, conference );
+                }
+            }
+            
+        } else if ( command.Source == Sources.Server ) {
+            
+            writeResult( new ResultData(ResultTypes.Message, send) );
+            
+        }               
     }
     private void notifyMessage( Command command, Conference conference )
     { notifyMembers( new Command(Sources.Server, command), conference ); }
     
     private void notifyMembers( Command command, Conference conference )
     {
-        conference.Members.stream().forEach( (ContactId contact) -> {
-            clientBase.getClient( contact ).
-                addCommand( command );
-        });
+        if ( conference != null ) {
+            conference.Members.stream().forEach( (ContactId contact) -> {
+                if ( contact != null ) {
+                    ClientReceiver receiver = clientBase.getClient( contact );
+                    if ( receiver != null ) {
+                        receiver.addCommand( command );
+                    } else { 
+                        errorLog( "receiver on id" + 
+                                contact.toString() + 
+                                " is null" );
+                    }
+                } else { conference.Members.remove( contact ); }
+            });           
+        } else { errorLog( "conference is null" ); }
     }
     
     private void refreshStorage() 
@@ -414,21 +557,30 @@ public class ClientProcessor extends Thread {
     }
     
     private void addLog( String log ) 
-    { 
-        System.out.println( ClientProcessor.class.getName() + ": " + log );
+    { System.out.println( ClientProcessor.class.getName() + ": " + log ); }
+    private void errorLog( String message )
+    {   
+        Throwable t = new Throwable();
+        StackTraceElement trace[] = t.getStackTrace();
+        if ( trace.length > 1 ) {
+            StackTraceElement element = trace[ CALLING_METHOD ];
+            addLog( element.getMethodName() + " " +
+                    element.getLineNumber() + " " + message );
+        }
     }
     
-    private ClientBase clientBase;
-    private FileBase fileBase;
-    private Socket socket;
+    private final ClientBase clientBase;
+    private final FileBase fileBase;
+    private final Socket socket;
     
     private ObjectOutputStream output;
-    private ContactId myContact;
-    private ClientReceiver myReceiver;
+    private ContactId myContact = new ContactId();
+    private final ClientReceiver myReceiver;
     
+    private final int CALLING_METHOD = 1;
     private boolean running = true;
     
     private ConcurrentLinkedQueue< Command > commands = 
             new ConcurrentLinkedQueue<>();
-    private ArrayList< ConferenceId > myConferences = new ArrayList<>();
+    private final ArrayList< ConferenceId > myConferences = new ArrayList<>();
 }
