@@ -98,8 +98,7 @@ public class Server extends Thread {
             
             release( serverSocket );     
         } catch (IOException ex) {
-            Logger.getLogger(Server.class.getName()).
-                    log(Level.SEVERE, null, ex);
+            addLog( "port is not available" );
         }
     }
     
@@ -125,9 +124,7 @@ public class Server extends Thread {
     }
     
     private void addLog( String log ) 
-    { 
-        System.out.println( Server.class.getName() + ": " + log );
-    }
+    { System.out.println( Server.class.getName() + ": " + log ); }
     
     private final int port = 4444;
     private final ClientBase clientBase = new ClientBase();

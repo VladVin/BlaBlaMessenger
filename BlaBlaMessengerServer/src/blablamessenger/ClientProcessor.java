@@ -53,7 +53,6 @@ public class ClientProcessor extends Thread {
     public void run()
     {
         while ( running ) {
-            addLog( "waiting for new command" );
             processCommand( getCommand() );
         }
     }    
@@ -69,7 +68,6 @@ public class ClientProcessor extends Thread {
                 disconnect();
             break;
             case RefreshContacts:
-                addLog( "get refresh contacts command" );
                 refreshContacts();
             break;
             case CreateConference:
@@ -230,9 +228,6 @@ public class ClientProcessor extends Thread {
     private void refreshContacts()
     {
         Contacts contacts = new Contacts( clientBase.getContacts() );
-        contacts.Contacts.stream().forEach((Contact) -> {
-            addLog(Contact.Name.Name);
-        });
         writeResult( new ResultData( ResultTypes.UpdatedContacts, contacts ) );           
     }
     

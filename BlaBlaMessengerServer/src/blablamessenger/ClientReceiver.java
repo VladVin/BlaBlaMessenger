@@ -41,17 +41,13 @@ public class ClientReceiver extends Thread {
         
         while ( true ) {
             try {
-                addLog( "waiting for new command" );
                 CommandData newCommand = ( CommandData ) input.readObject();
-                addLog( "get " + newCommand.Command.name() + " command" );
                 if ( registered && 
                         newCommand.Command != Commands.RegisterContact ) {
-                    addCommand( new Command( Sources.Client, newCommand ) );
-                    addLog( "added new command" );                    
+                    addCommand( new Command( Sources.Client, newCommand ) );                
                 } else if ( newCommand.Command == Commands.RegisterContact ) {
                     registered = true;
                     addCommand( new Command( Sources.Client, newCommand ) );
-                    addLog( "added new command" );
                 }
             } catch ( IOException | ClassNotFoundException ex ) {
                 break;
@@ -72,9 +68,7 @@ public class ClientReceiver extends Thread {
     { addCommand( new Command( Sources.Client, Commands.Disconnect, null ) ); }
     
     private void addLog( String log ) 
-    { 
-        System.out.println( ClientReceiver.class.getName() + ": " + log );
-    }
+    { System.out.println( ClientReceiver.class.getName() + ": " + log ); }
     
     private final ClientBase clientBase;
     private final FileBase fileBase;
