@@ -17,6 +17,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,31 +27,31 @@ public class Server extends Thread {
     
     public class ClientBase {
         public void addContact( Contact contact ) 
-        { contacts.put( contact.Id, contact ); }
+        { contacts.put( contact.Id.Id, contact ); }
         public Contact removeContact( ContactId contact ) 
-        { return contacts.remove( contact ); }
+        { return contacts.remove( contact.Id ); }
         public ArrayList< Contact > getContacts()
         { return new ArrayList<>( contacts.values() ); }
         
         public void addConference( Conference conference )
-        { conferences.put( conference.Id, conference ); }
+        { conferences.put( conference.Id.Id, conference ); }
         public Conference removeConference( ConferenceId conference )
-        { return conferences.remove( conference ); }
+        { return conferences.remove( conference.Id ); }
         public Conference getConference( ConferenceId conference )
-        { return conferences.get( conference ); }
+        { return conferences.get( conference.Id ); }
         
         public void addClient( ContactId contact, ClientReceiver client )
-        { clients.put( contact, client ); }
+        { clients.put( contact.Id, client ); }
         public ClientReceiver removeClient( ContactId client )
-        { return clients.remove( client ); }
+        { return clients.remove( client.Id ); }
         public ClientReceiver getClient( ContactId contact )
-        { return clients.get( contact ); }
+        { return clients.get( contact.Id ); }
         
-        private ConcurrentHashMap< ContactId, Contact > contacts = 
+        private final ConcurrentHashMap< UUID, Contact > contacts = 
                 new ConcurrentHashMap();
-        private ConcurrentHashMap< ConferenceId, Conference > conferences =
+        private final ConcurrentHashMap< UUID, Conference > conferences =
                 new ConcurrentHashMap();
-        private ConcurrentHashMap< ContactId, ClientReceiver > clients =
+        private final ConcurrentHashMap< UUID, ClientReceiver > clients =
                 new ConcurrentHashMap();
     }
    
@@ -111,7 +112,7 @@ public class Server extends Thread {
         }
         
         clientBase.clients.entrySet().stream().forEach(
-                (Entry< ContactId, ClientReceiver > client) -> {
+                (Entry< UUID, ClientReceiver > client) -> {
             client.getValue().addCommand( new Command( Sources.Server,
                     Commands.Disconnect, null ) );
         });
