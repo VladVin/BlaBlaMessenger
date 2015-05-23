@@ -2,5 +2,11 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+        <group>
+            <file>file:/C:/Users/VladVin/Source/Repos/BlaBlaMessenger/BlaBlaMessengerServer/src/blablamessenger/ClientProcessor.java</file>
+            <file>file:/C:/Users/VladVin/Source/Repos/BlaBlaMessenger/BlaBlaMessengerServer/src/data_structures/ContactMessagePair.java</file>
+            <file>file:/C:/Users/VladVin/Source/Repos/BlaBlaMessenger/BlaBlaMessengerServer/src/blablamessenger/Server.java</file>
+            <file>file:/C:/Users/VladVin/Source/Repos/BlaBlaMessenger/BlaBlaMessengerServer/src/blablamessenger/ClientReceiver.java</file>
+        </group>
     </open-files>
 </project-private>
