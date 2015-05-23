@@ -4,9 +4,9 @@ public class Contact extends DataObject {
     public ContactName Name;
     public ContactId Id;
     
-    public Contact( final ContactName name )
+    public Contact( final ContactName name, final ContactId id )
     {
         Name = name;
-        Id = new ContactId();
+        Id = id;
     }
 }
