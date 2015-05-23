@@ -2,7 +2,7 @@ package data_structures;
 
 import java.io.Serializable;
 
-public enum Commands implements Serializable{
+public enum Commands implements Serializable {
     RegisterContact,
     Disconnect,
     RefreshContacts,
