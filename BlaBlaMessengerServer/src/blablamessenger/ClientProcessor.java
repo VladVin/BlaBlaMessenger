@@ -31,12 +31,13 @@ import java.util.logging.Logger;
 
 public class ClientProcessor extends Thread {
     public ClientProcessor( ClientBase clientBase, FileBase fileBase,
-            Socket myClient,
+            Socket myClient, ContactId myContact,
             ClientReceiver receiver, ConcurrentLinkedQueue inputCommands )
     {
         this.clientBase = clientBase;
         socket = myClient;
         myReceiver = receiver;
+        this.myContact = myContact;
         commands = inputCommands;
         this.fileBase = fileBase;
         
@@ -574,7 +575,7 @@ public class ClientProcessor extends Thread {
     private final Socket socket;
     
     private ObjectOutputStream output;
-    private ContactId myContact = new ContactId();
+    private ContactId myContact;
     private final ClientReceiver myReceiver;
     
     private final int CALLING_METHOD = 1;
@@ -582,5 +583,5 @@ public class ClientProcessor extends Thread {
     
     private ConcurrentLinkedQueue< Command > commands = 
             new ConcurrentLinkedQueue<>();
-    private final ArrayList< ConferenceId > myConferences = new ArrayList<>();
+    private ArrayList< ConferenceId > myConferences = new ArrayList<>();
 }
