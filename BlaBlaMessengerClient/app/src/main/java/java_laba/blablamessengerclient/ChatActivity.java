@@ -22,6 +22,7 @@ import data_structures.Commands;
 import data_structures.Contact;
 import data_structures.ContactId;
 import list_adapters_and_updaters.ContactListAdapter;
+import list_adapters_and_updaters.FileStorageListAdapter;
 
 import static android.widget.Toast.*;
 
@@ -68,6 +69,16 @@ public class ChatActivity extends ActionBarActivity {
                 Contact contact = (Contact)contactList.getItemAtPosition(position);
                 GeneralData.conversationContactsPair = new ConversationContactsPair(myContactId, contact.Id);
                 Intent intent = new Intent(getBaseContext(), ConversationActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+
+        Button fileStorageBtn = (Button)findViewById(R.id.fileStorageButton);
+        fileStorageBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getBaseContext(), FileStorageActivity.class);
                 startActivity(intent);
                 finish();
             }

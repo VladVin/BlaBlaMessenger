@@ -13,11 +13,18 @@
         android:textSize="@dimen/abc_text_size_large_material"
         android:id="@+id/title" />
 
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="File Storage"
+        android:id="@+id/fileStorageButton"
+        android:layout_below="@id/title"/>
+
     <ListView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:id="@+id/contactsList"
-        android:layout_below="@+id/title"
+        android:layout_below="@+id/fileStorageButton"
         android:layout_alignParentStart="true" />
 
 </RelativeLayout>
