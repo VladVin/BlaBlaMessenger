@@ -6,6 +6,7 @@ import blablamessenger.Server.FileBase;
 
 import data_structures.CommandData;
 import data_structures.Commands;
+import data_structures.ContactId;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -18,11 +19,12 @@ public class ClientReceiver extends Thread {
     public void addCommand( Command command ) { commands.add( command ); }
 
     public ClientReceiver( ClientBase clientBase, FileBase fileBase, 
-            Socket newClient )
+        ContactId myContact, Socket newClient )
     {
         this.clientBase = clientBase;
         client = newClient;
         this.fileBase = fileBase;
+        this.myContact = myContact;
         
         try {
             input = new ObjectInputStream( client.getInputStream() );
@@ -41,6 +43,7 @@ public class ClientReceiver extends Thread {
             try {
                 addLog( "waiting for new command" );
                 CommandData newCommand = ( CommandData ) input.readObject();
+                addLog( "get " + newCommand.Command.name() + " command" );
                 if ( registered && 
                         newCommand.Command != Commands.RegisterContact ) {
                     addCommand( new Command( Sources.Client, newCommand ) );
@@ -62,8 +65,8 @@ public class ClientReceiver extends Thread {
     
     private void createProcessor()
     { 
-        new ClientProcessor( clientBase, fileBase, client, this, commands ).
-            start();
+        new ClientProcessor( clientBase, fileBase, client, myContact, 
+            this, commands ).start();
     }
     private void releaseProcessor()
     { addCommand( new Command( Sources.Client, Commands.Disconnect, null ) ); }
@@ -76,6 +79,7 @@ public class ClientReceiver extends Thread {
     private ClientBase clientBase;
     private FileBase fileBase;
     private Socket client;
+    private ContactId myContact;
     
     private ObjectInputStream input;
     private ConcurrentLinkedQueue< Command > commands = 

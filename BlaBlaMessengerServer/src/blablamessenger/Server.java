@@ -47,11 +47,11 @@ public class Server extends Thread {
         public ClientReceiver getClient( ContactId contact )
         { return clients.get( contact.Id ); }
         
-        private final ConcurrentHashMap< UUID, Contact > contacts = 
+        private ConcurrentHashMap< UUID, Contact > contacts = 
                 new ConcurrentHashMap();
-        private final ConcurrentHashMap< UUID, Conference > conferences =
+        private ConcurrentHashMap< UUID, Conference > conferences =
                 new ConcurrentHashMap();
-        private final ConcurrentHashMap< UUID, ClientReceiver > clients =
+        private ConcurrentHashMap< UUID, ClientReceiver > clients =
                 new ConcurrentHashMap();
     }
    
@@ -70,9 +70,9 @@ public class Server extends Thread {
         public FileData remove( FileId file )
         { return filesData.remove( file ); }
         
-        private ConcurrentHashMap< FileId, FileIdNamePair > files =
+        private final ConcurrentHashMap< FileId, FileIdNamePair > files =
                 new ConcurrentHashMap();
-        private ConcurrentHashMap< FileId, FileData > filesData =
+        private final ConcurrentHashMap< FileId, FileData > filesData =
                 new ConcurrentHashMap();
     }
     
@@ -87,8 +87,12 @@ public class Server extends Thread {
                 try {
                     Socket newClient = serverSocket.accept();
                     addLog( "waited new client" );
-                    new ClientReceiver( clientBase, fileBase, newClient ).
-                            start();
+                    ContactId newClientId = new ContactId();
+                    ClientReceiver client = 
+                        new ClientReceiver( clientBase, fileBase, 
+                            newClientId, newClient );
+                    client.start();
+                    clientBase.addClient( newClientId, client );
                 } catch ( SocketTimeoutException e ) {}
             }
             
@@ -126,8 +130,8 @@ public class Server extends Thread {
     }
     
     private final int port = 4444;
-    private ClientBase clientBase = new ClientBase();
-    private FileBase fileBase = new FileBase();
+    private final ClientBase clientBase = new ClientBase();
+    private final FileBase fileBase = new FileBase();
     
     private final int CONNECTION_TIMEOUT;
 }
