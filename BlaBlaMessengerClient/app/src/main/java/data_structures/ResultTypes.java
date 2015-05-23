@@ -2,7 +2,7 @@ package data_structures;
 
 import java.io.Serializable;
 
-public enum ResultTypes implements Serializable{
+public enum ResultTypes implements Serializable {
     ContactId,
     UpdatedContacts,
     CreatedConference,
