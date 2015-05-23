@@ -66,7 +66,7 @@ public class ChatActivity extends ActionBarActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Contact contact = (Contact)contactList.getItemAtPosition(position);
-                GeneralData.conversationContactsPair = new GeneralData.ConversationContactsPair(myContactId, contact.Id);
+                GeneralData.conversationContactsPair = new ConversationContactsPair(myContactId, contact.Id);
                 Intent intent = new Intent(getBaseContext(), ConversationActivity.class);
                 startActivity(intent);
                 finish();

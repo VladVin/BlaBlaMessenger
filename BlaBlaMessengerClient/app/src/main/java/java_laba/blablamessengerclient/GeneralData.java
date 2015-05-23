@@ -9,14 +9,4 @@ import data_structures.ContactId;
 public class GeneralData {
     public static Cloud cloud;
     public static ConversationContactsPair conversationContactsPair;
-
-    public static class ConversationContactsPair {
-        public ContactId me;
-        public ContactId friend;
-
-        public ConversationContactsPair(ContactId meId, ContactId friendId) {
-            me = meId;
-            friend = friendId;
-        }
-    }
 }
