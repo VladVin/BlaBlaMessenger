@@ -49,9 +49,10 @@ public class MessageListAdapter extends BaseAdapter {
                 convertView = mLayoutInflater.inflate(R.layout.interlocutor_message_item, parent, false);
                 contactInfo = (TextView) convertView.findViewById(R.id.messageLineInterlocutor);
             }
-        if (messagePair != null)
-            contactInfo.setText(messagePair.Message.Data);
-        else contactInfo.setText("There is no messages");
+        if (contactInfo != null)
+            if (messagePair != null)
+                contactInfo.setText(messagePair.Message.Data);
+            else contactInfo.setText("There is no messages");
 
         return convertView;
     }

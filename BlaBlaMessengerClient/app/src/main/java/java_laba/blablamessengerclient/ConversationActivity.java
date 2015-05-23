@@ -61,7 +61,6 @@ public class ConversationActivity extends ActionBarActivity {
                     ContactMessagePair contactMessagePair = new ContactMessagePair(friendContactId, new MessageData(message));
                     CommandData messageCommand = new CommandData(Commands.SendMessageToContact, contactMessagePair);
                     cloud.requestData(messageCommand);
-                    cloud.getStorage().pushData(new ResultData(ResultTypes.Message, contactMessagePair));
                 }
             }
         });
