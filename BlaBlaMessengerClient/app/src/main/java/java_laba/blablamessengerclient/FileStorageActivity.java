@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -70,6 +71,13 @@ public class FileStorageActivity extends ActionBarActivity {
 //                Intent intent = new Intent(getBaseContext(), ConversationActivity.class);
 //                startActivity(intent);
 //                finish();
+            }
+        });
+
+        ((Button)findViewById(R.id.uploadNewFileButton)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
             }
         });
     }
