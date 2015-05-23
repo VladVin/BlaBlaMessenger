@@ -31,19 +31,24 @@ public class LoginActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        CloudCreator cloudCreator = new CloudCreator();
+        if (GeneralData.cloud == null) {
+            try {
+                GeneralData.cloud = cloudCreator.execute().get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+        else {
+            showMessage(cloudCreator.getCloudException().getMessage());
+        }
+
         ((Button)findViewById(R.id.signInButton)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CloudCreator cloudCreator = new CloudCreator();
-                if (GeneralData.cloud == null) {
-                    try {
-                        GeneralData.cloud = cloudCreator.execute().get();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    } catch (ExecutionException e) {
-                        e.printStackTrace();
-                    }
-                }
+
 
                 if (GeneralData.cloud != null) {
                     String userName = ((EditText)findViewById(R.id.nameField)).getText().toString();
@@ -62,7 +67,7 @@ public class LoginActivity extends ActionBarActivity {
                     }
                 }
                 else {
-                    showMessage(cloudCreator.getCloudException().getMessage());
+                    showMessage("Cloud has not been created yet");
                 }
             }
         });

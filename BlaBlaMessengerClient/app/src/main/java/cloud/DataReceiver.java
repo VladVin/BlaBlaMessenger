@@ -45,7 +45,7 @@ public class DataReceiver extends Thread {
             }
             catch(Exception e)
             {
-                Log.d("DataReceiver", "Read object exception");
+                Log.d("DataReceiver", "Read object exception: " + e.getMessage());
                 // TODO: Handle the exception
             }
             if (result != null) {

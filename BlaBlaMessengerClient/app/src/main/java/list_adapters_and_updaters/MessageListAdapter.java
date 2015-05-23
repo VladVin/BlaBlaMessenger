@@ -12,10 +12,12 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 import data_structures.Contact;
 import data_structures.ContactMessagePair;
 import data_structures.MessageData;
+import java_laba.blablamessengerclient.ConversationContactsPair;
 import java_laba.blablamessengerclient.R;
 
 
@@ -24,20 +26,29 @@ public class MessageListAdapter extends BaseAdapter {
     private Context mContext;
     private LayoutInflater mLayoutInflater;
     private ArrayList<ContactMessagePair> mMessages;
+    private ConversationContactsPair mDialog;
 
-    public MessageListAdapter(Context context, ArrayList<ContactMessagePair> messages) {
+    public MessageListAdapter(Context context, ArrayList<ContactMessagePair> messages, ConversationContactsPair dialog) {
         mContext = context;
         mLayoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mMessages = messages;
+        mDialog = dialog;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ContactMessagePair messagePair = (ContactMessagePair) getItem(position);
+        TextView contactInfo = null;
         // TODO: Show various messages with various color
         if (convertView == null)
-            convertView = mLayoutInflater.inflate(R.layout.contact_list_item, parent, false);
-        TextView contactInfo = (TextView)convertView.findViewById(R.id.contactLine);
+            if (messagePair.Contact.Id == mDialog.me.Id) {
+                convertView = mLayoutInflater.inflate(R.layout.message_list_item, parent, false);
+                contactInfo = (TextView) convertView.findViewById(R.id.messageLine);
+            }
+            else {
+                convertView = mLayoutInflater.inflate(R.layout.interlocutor_message_item, parent, false);
+                contactInfo = (TextView) convertView.findViewById(R.id.messageLineInterlocutor);
+            }
         if (messagePair != null)
             contactInfo.setText(messagePair.Message.Data);
         else contactInfo.setText("There is no messages");

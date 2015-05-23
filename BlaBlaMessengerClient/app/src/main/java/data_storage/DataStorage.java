@@ -9,6 +9,8 @@ import java.util.concurrent.LinkedBlockingDeque;
 import data_structures.ContactId;
 import data_structures.ContactMessagePair;
 import data_structures.Contacts;
+import data_structures.FileIdNamePair;
+import data_structures.FileIdNamePairs;
 import data_structures.ResultData;
 import data_structures.ResultTypes;
 
@@ -19,6 +21,7 @@ public class DataStorage {
     private ContactId contactId;
     private Contacts contacts;
     private ArrayList<ContactMessagePair> messages;
+    private ArrayList<FileIdNamePair> files;
 
     private ArrayList<ResultTypes> whatUpdated;
 
@@ -50,6 +53,11 @@ public class DataStorage {
                 addWhatUpdate(ResultTypes.Message);
                 Log.d("DataStorage", "Message received");
                 break;
+            case UpdatedFiles:
+                files = ((FileIdNamePairs)resData.Data).Pairs;
+                addWhatUpdate(ResultTypes.UpdatedFiles);
+                Log.d("DataStorage", "Files list received");
+                break;
         }
     }
 
@@ -66,6 +74,11 @@ public class DataStorage {
     public ArrayList<ContactMessagePair> getMessages() {
         whatUpdated.remove(ResultTypes.Message);
         return messages;
+    }
+
+    public ArrayList<FileIdNamePair> getFiles() {
+        whatUpdated.remove(ResultTypes.UpdatedFiles);
+        return files;
     }
 
     public ResultTypes whatUpdated() {

@@ -4,50 +4,49 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
-
-import android.util.Log;
 import android.widget.ListView;
-import android.widget.TextView;
+
+import java.util.ArrayList;
 
 import cloud.Cloud;
-import cloud.CloudException;
 import data_storage.DataStorage;
 import data_structures.CommandData;
 import data_structures.Commands;
 import data_structures.Contact;
 import data_structures.ContactId;
+import data_structures.FileIdNamePair;
 import list_adapters_and_updaters.ContactListAdapter;
 import list_adapters_and_updaters.FileStorageListAdapter;
 
-import static android.widget.Toast.*;
+import static android.widget.Toast.LENGTH_LONG;
+import static android.widget.Toast.makeText;
 
-public class ChatActivity extends ActionBarActivity {
+
+public class FileStorageActivity extends ActionBarActivity {
 
     private Cloud cloud = null;
-    private ContactListAdapter contactsAdapter = null;
+    private FileStorageListAdapter filesAdapter = null;
     private DataUpdaterTask dataUpdaterTask = null;
     private CommandSenderTask commandSenderTask = null;
     private ContactId myContactId = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-        Log.d("ChatActivity", "onCreate called");
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_chat);
+        setContentView(R.layout.activity_file_storage);
 
         // Take the cloud
         cloud = GeneralData.cloud;
 
         // Add List View
-        final ListView contactList = (ListView)findViewById(R.id.contactsList);
-        contactsAdapter = new ContactListAdapter(this, null);
-        contactList.setAdapter(contactsAdapter);
+        final ListView filesList = (ListView)findViewById(R.id.filesList);
+        filesAdapter = new FileStorageListAdapter(this, null);
+        filesList.setAdapter(filesAdapter);
 
         // Start data updater
         dataUpdaterTask = new DataUpdaterTask(cloud);
@@ -63,32 +62,23 @@ public class ChatActivity extends ActionBarActivity {
         }
 
         // Listeners
-        contactList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        filesList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Contact contact = (Contact)contactList.getItemAtPosition(position);
-                GeneralData.conversationContactsPair = new ConversationContactsPair(myContactId, contact.Id);
-                Intent intent = new Intent(getBaseContext(), ConversationActivity.class);
-                startActivity(intent);
-                finish();
-            }
-        });
-
-        Button fileStorageBtn = (Button)findViewById(R.id.fileStorageButton);
-        fileStorageBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getBaseContext(), FileStorageActivity.class);
-                startActivity(intent);
-                finish();
+                FileIdNamePair filePair = (FileIdNamePair)filesList.getItemAtPosition(position);
+                // TODO: Download the file
+//                Intent intent = new Intent(getBaseContext(), ConversationActivity.class);
+//                startActivity(intent);
+//                finish();
             }
         });
     }
 
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_chat, menu);
+        getMenuInflater().inflate(R.menu.menu_file_storage, menu);
         return true;
     }
 
@@ -117,7 +107,7 @@ public class ChatActivity extends ActionBarActivity {
     private void showError(final String text){
         runOnUiThread(new Runnable() {
             public void run() {
-                makeText(ChatActivity.this, text, LENGTH_LONG).show();
+                makeText(FileStorageActivity.this, text, LENGTH_LONG).show();
             }
         });
         finish();
@@ -127,7 +117,7 @@ public class ChatActivity extends ActionBarActivity {
         runOnUiThread(new Runnable() {
             public void run()
             {
-                makeText(ChatActivity.this, text, LENGTH_LONG).show();
+                makeText(FileStorageActivity.this, text, LENGTH_LONG).show();
             }
         });
     }
@@ -137,10 +127,10 @@ public class ChatActivity extends ActionBarActivity {
         @Override
         protected Void doInBackground(Void... params) {
             while (!isCancelled()) {
-                CommandData queryContacts = new CommandData(Commands.RefreshContacts, null);
+                CommandData queryFiles = new CommandData(Commands.RefreshStorage, null);
                 try {
-                    cloud.requestData(queryContacts);
-                    Log.d("CommandSenderTask", "Sent update contacts query");
+                    cloud.requestData(queryFiles);
+                    Log.d("CommandSenderTask", "Sent update files query");
                 }
                 catch (NullPointerException e) {
                     showMessage("Cloud has not been created yet");
@@ -167,20 +157,16 @@ public class ChatActivity extends ActionBarActivity {
         }
 
         @Override
-        protected Void doInBackground(Void... params){
-            while (!isCancelled())
-            {
+        protected Void doInBackground(Void... params) {
+            while (!isCancelled()) {
                 if (cloud != null) {
                     DataStorage storage = cloud.getStorage();
                     synchronized (storage) {
                         updateData(storage);
                     }
-                    try
-                    {
+                    try {
                         Thread.sleep(50);
-                    }
-                    catch (InterruptedException e)
-                    {
+                    } catch (InterruptedException e) {
                         return null;
                     }
                 }
@@ -188,8 +174,7 @@ public class ChatActivity extends ActionBarActivity {
             return null;
         }
 
-        private void updateData(final DataStorage storage)
-        {
+        private void updateData(final DataStorage storage) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -199,9 +184,11 @@ public class ChatActivity extends ActionBarActivity {
                                 myContactId = storage.getContactId();
                                 break;
                             case UpdatedContacts:
-                                if (storage.getContacts() != null) {
-                                    contactsAdapter.updateContacts(storage.getContacts().Contacts);
-                                }
+                                storage.getContacts();
+                                break;
+                            case UpdatedFiles:
+                                ArrayList<FileIdNamePair> files = storage.getFiles();
+                                filesAdapter.updateFiles(files);
                                 break;
                         }
                     }

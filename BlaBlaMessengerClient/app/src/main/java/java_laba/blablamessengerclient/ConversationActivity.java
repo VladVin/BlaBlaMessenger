@@ -44,7 +44,7 @@ public class ConversationActivity extends ActionBarActivity {
         cloud = GeneralData.cloud;
 
         ArrayList<ContactMessagePair> tMessages = chooseMessages(cloud.getStorage().getMessages());
-        messageListAdapter = new MessageListAdapter(this, tMessages);
+        messageListAdapter = new MessageListAdapter(this, tMessages, GeneralData.conversationContactsPair);
         ((ListView)findViewById(R.id.messageList)).setAdapter(messageListAdapter);
 
         // Start data updater

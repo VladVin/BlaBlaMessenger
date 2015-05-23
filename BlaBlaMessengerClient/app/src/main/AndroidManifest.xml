@@ -27,6 +27,10 @@
             android:name=".ConversationActivity"
             android:label="@string/title_activity_conversation" >
         </activity>
+        <activity
+            android:name=".FileStorageActivity"
+            android:label="@string/title_activity_file_storage" >
+        </activity>
     </application>
 
 </manifest>
