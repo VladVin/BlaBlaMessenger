@@ -139,21 +139,12 @@ public class ClientProcessor extends Thread {
     }
     private void addToBase( Contact contact )
     {
-        addMyContactToBase( contact );
-        addMyReceiverToBase();       
+        addMyContactToBase( contact );      
     }
     private void addMyContactToBase( Contact contact )
     {
         if ( myContact.Id != null ) {
                 clientBase.addContact( contact );
-        } else { errorLog( "myContact is null" ); }
-    }
-    private void addMyReceiverToBase()
-    {
-        if ( myContact.Id != null ) {
-            if ( myReceiver != null ) {
-                clientBase.addClient( myContact, myReceiver );                   
-            } else { errorLog( "myReceiver is null" ); }
         } else { errorLog( "myContact is null" ); }
     }
     
