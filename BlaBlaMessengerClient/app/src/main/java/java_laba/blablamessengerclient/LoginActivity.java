@@ -31,45 +31,39 @@ public class LoginActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        CloudCreator cloudCreator = new CloudCreator();
-        if (GeneralData.cloud == null) {
-            try {
-                GeneralData.cloud = cloudCreator.execute().get();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-        }
-
         ((Button)findViewById(R.id.signInButton)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                try {
+                CloudCreator cloudCreator = new CloudCreator();
+                if (GeneralData.cloud == null) {
+                    try {
+                        GeneralData.cloud = cloudCreator.execute().get();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    }
+                }
 
-                    if (GeneralData.cloud != null) {
-                        String userName = ((EditText)findViewById(R.id.nameField)).getText().toString();
-                        if (userName.trim().length() != 0) {
+                if (GeneralData.cloud != null) {
+                    String userName = ((EditText)findViewById(R.id.nameField)).getText().toString();
+                    if (userName.trim().length() != 0) {
+
 //                            new LoginThread(new ContactName(userName)).start();
-                            CommandData registerData = new CommandData(Commands.RegisterContact, new ContactName(userName));
-                            GeneralData.cloud.requestData(registerData);
+                        CommandData registerData = new CommandData(Commands.RegisterContact, new ContactName(userName));
+                        GeneralData.cloud.requestData(registerData);
 //                            Thread.sleep(3000);
-                            Intent intent = new Intent(v.getContext(), ChatActivity.class);
-                            startActivity(intent);
-                            finish();
-                        }
-                        else {
-                            showMessage("Enter you name, please");
-                        }
+                        Intent intent = new Intent(v.getContext(), ChatActivity.class);
+                        startActivity(intent);
+                        finish();
                     }
                     else {
-                        //showMessage(cloudCreator.getCloudException().getMessage());
+                        showMessage("Enter you name, please");
                     }
-//                } catch (InterruptedException e) {
-//                    showMessage("Cloud creation problem");
-//                } catch (ExecutionException e) {
-//                    showMessage("Cloud creation problem");
-//                }
+                }
+                else {
+                    showMessage(cloudCreator.getCloudException().getMessage());
+                }
             }
         });
     }

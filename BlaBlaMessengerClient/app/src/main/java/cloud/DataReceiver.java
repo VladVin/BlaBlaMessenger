@@ -49,6 +49,7 @@ public class DataReceiver extends Thread {
                 // TODO: Handle the exception
             }
             if (result != null) {
+                // This queue is thread-safely
                 resDataQueue.add(result);
                 synchronized (resDataQueue)
                 {
