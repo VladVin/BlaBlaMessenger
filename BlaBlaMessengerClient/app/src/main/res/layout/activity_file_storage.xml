@@ -18,14 +18,14 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="Upload New File"
-        android:id="@+id/fileStorageButton"
+        android:id="@+id/uploadNewFileButton"
         android:layout_below="@id/titleFilesList"/>
 
     <ListView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:id="@+id/filesList"
-        android:layout_below="@+id/fileStorageButton"
+        android:layout_below="@+id/uploadNewFileButton"
         android:layout_alignParentStart="true" />
 
 </RelativeLayout>
