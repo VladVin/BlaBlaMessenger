@@ -129,6 +129,7 @@ public class ChatActivity extends ActionBarActivity {
                 CommandData queryContacts = new CommandData(Commands.RefreshContacts, null);
                 try {
                     cloud.requestData(queryContacts);
+                    Log.d("CommandSenderTask", "Sent update contacts query");
                 }
                 catch (NullPointerException e) {
                     showMessage("Cloud has not been created yet");
