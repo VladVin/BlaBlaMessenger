@@ -57,22 +57,22 @@ public class Server extends Thread {
    
     public class FileBase {
         public void addFile( FileIdNamePair file )
-        { files.put( file.Id, file ); }
+        { files.put( file.Id.Id, file ); }
         public FileIdNamePair removeFile( FileId file )
-        { return files.remove( file ); }
+        { return files.remove( file.Id ); }
         public FileIdNamePairs getFiles()
         { return new FileIdNamePairs( new ArrayList<>(files.values()) ); }
         
         public void upload( FileId id, FileData data )
-        { filesData.put( id, data ); }
+        { filesData.put( id.Id, data ); }
         public FileData download( FileId file )
-        { return filesData.get( file ); }
+        { return filesData.get( file.Id ); }
         public FileData remove( FileId file )
-        { return filesData.remove( file ); }
+        { return filesData.remove( file.Id ); }
         
-        private final ConcurrentHashMap< FileId, FileIdNamePair > files =
+        private final ConcurrentHashMap< UUID, FileIdNamePair > files =
                 new ConcurrentHashMap();
-        private final ConcurrentHashMap< FileId, FileData > filesData =
+        private final ConcurrentHashMap< UUID, FileData > filesData =
                 new ConcurrentHashMap();
     }
     

@@ -15,6 +15,7 @@ import data_structures.ContactMessagePair;
 import data_structures.ContactName;
 import data_structures.Contacts;
 import data_structures.File;
+import data_structures.FileData;
 import data_structures.FileId;
 import data_structures.FileIdNamePair;
 import data_structures.FileIdNamePairs;
@@ -136,13 +137,11 @@ public class ClientProcessor extends Thread {
         writeResult( new ResultData( ResultTypes.ContactId, myContact ) );
     }
     private void addToBase( Contact contact )
-    {
-        addMyContactToBase( contact );      
-    }
+    { addMyContactToBase( contact ); }
     private void addMyContactToBase( Contact contact )
     {
         if ( myContact.Id != null ) {
-                clientBase.addContact( contact );
+            clientBase.addContact( contact );
         } else { errorLog( "myContact is null" ); }
     }
     
@@ -504,25 +503,37 @@ public class ClientProcessor extends Thread {
         File newFile = ( File ) command.Data;
         FileId newId = new FileId();
         
-        addToBase( newId, newFile );
+        addFileToBase( newId, newFile );
         writeResult( new ResultData(ResultTypes.UploadedFile, newId) );
     }
-    private void addToBase( FileId id, File file )
+    private void addFileToBase( FileId id, File file )
     {
-        fileBase.addFile( new FileIdNamePair( id, file.Name ) );
-        fileBase.upload( id, file.Data );
+        if ( id.Id != null ) {
+            fileBase.addFile( new FileIdNamePair( id, file.Name ) );
+            fileBase.upload( id, file.Data );
+        } else { errorLog( "id of file is null" ); }
     }
     
     private void downloadFile( Command command ) 
     {
         FileId file = ( FileId ) command.Data;
-        writeResult( new ResultData(ResultTypes.DownloadedFile, 
-                fileBase.download( file )) );
+        if ( file.Id == null ) {
+            errorLog( "id of file is null" );
+            return;
+        }
+        
+        FileData data = fileBase.download( file );
+        writeResult( new ResultData(ResultTypes.DownloadedFile, data) );
     }
     
     private void removeFile( Command command ) 
     {
         FileId file = ( FileId ) command.Data;
+        if ( file.Id == null ) {
+            errorLog( "id of file is null" );
+            return;
+        }
+        
         deleteFromBase( file );
         writeResult( new ResultData(ResultTypes.RemovedFile, file) );
     }

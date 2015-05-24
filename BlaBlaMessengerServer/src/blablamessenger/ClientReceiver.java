@@ -76,7 +76,7 @@ public class ClientReceiver extends Thread {
     private final ContactId myContact;
     
     private ObjectInputStream input;
-    private ConcurrentLinkedQueue< Command > commands = 
+    private final ConcurrentLinkedQueue< Command > commands = 
             new ConcurrentLinkedQueue<>();
     private boolean registered = false;
 }
