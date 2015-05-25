@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/BlaBlaMessengerClient.iml" filepath="$PROJECT_DIR$/BlaBlaMessengerClient.iml" />
+      <module fileurl="file://$PROJECT_DIR$/libs/aFileDialog/app/aFileDialog.iml" filepath="$PROJECT_DIR$/libs/aFileDialog/app/aFileDialog.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

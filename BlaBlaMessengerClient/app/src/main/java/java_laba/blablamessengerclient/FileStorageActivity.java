@@ -14,6 +14,7 @@ import android.widget.ListView;
 
 import java.util.ArrayList;
 
+import ar.com.daidalos.afiledialog.FileChooserDialog;
 import cloud.Cloud;
 import data_storage.DataStorage;
 import data_structures.CommandData;
@@ -77,7 +78,9 @@ public class FileStorageActivity extends ActionBarActivity {
         ((Button)findViewById(R.id.uploadNewFileButton)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                FileChooserDialog dialog = new FileChooserDialog(v.getContext());
+                dialog.setFilter(".*jpg|.*png|.*gif|.*JPG|.*PNG|.*GIF");
+                dialog.show();
             }
         });
     }
