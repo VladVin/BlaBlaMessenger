@@ -57,22 +57,22 @@ public class Server extends Thread {
    
     public class FileBase {
         public void addFile( FileIdNamePair file )
-        { files.put( file.Id.Id, file ); }
+        { files.put( file.Id, file ); }
         public FileIdNamePair removeFile( FileId file )
-        { return files.remove( file.Id ); }
+        { return files.remove( file ); }
         public FileIdNamePairs getFiles()
         { return new FileIdNamePairs( new ArrayList<>(files.values()) ); }
         
         public void upload( FileId id, FileData data )
-        { filesData.put( id.Id, data ); }
+        { filesData.put( id, data ); }
         public FileData download( FileId file )
-        { return filesData.get( file.Id ); }
+        { return filesData.get( file ); }
         public FileData remove( FileId file )
-        { return filesData.remove( file.Id ); }
+        { return filesData.remove( file ); }
         
-        private final ConcurrentHashMap< UUID, FileIdNamePair > files =
+        private final ConcurrentHashMap< FileId, FileIdNamePair > files =
                 new ConcurrentHashMap();
-        private final ConcurrentHashMap< UUID, FileData > filesData =
+        private final ConcurrentHashMap< FileId, FileData > filesData =
                 new ConcurrentHashMap();
     }
     
@@ -98,7 +98,8 @@ public class Server extends Thread {
             
             release( serverSocket );     
         } catch (IOException ex) {
-            addLog( "port is not available" );
+            Logger.getLogger(Server.class.getName()).
+                    log(Level.SEVERE, null, ex);
         }
     }
     
@@ -124,7 +125,9 @@ public class Server extends Thread {
     }
     
     private void addLog( String log ) 
-    { System.out.println( Server.class.getName() + ": " + log ); }
+    { 
+        System.out.println( Server.class.getName() + ": " + log );
+    }
     
     private final int port = 4444;
     private final ClientBase clientBase = new ClientBase();
