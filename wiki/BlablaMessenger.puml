@@ -1,0 +1,171 @@
+@startuml
+
+class CommandData implements Serializable {
+    public Commands Command;
+    public DataObject Data;
+
+    public CommandData( final Commands command, final DataObject data );
+}
+
+enum Commands implements Serializable {
+    RegisterContact,
+    Disconnect,
+    RefreshContacts,
+    CreateConference,
+    AddToConference,
+    RemoveFromConference,
+    DeleteConference,
+    SendMessageToContact,
+    SendMessageToConference,
+    RefreshStorage,
+    UploadFile,
+    DownloadFile,
+    RemoveFile
+}
+
+class Conference extends DataObject {
+    public ConferenceName Name;
+    public ConferenceId Id;
+    public ArrayList< ContactId > Members;
+
+    public Conference( final ConferenceName name,
+            final ArrayList< ContactId > members );
+
+    public Conference( final Conference conference );
+}
+
+class ConferenceId extends DataObject {
+    public UUID Id;
+    public ConferenceId();
+}
+
+class ConferenceName extends DataObject {
+    public String Name;
+    public ConferenceName( String name );
+}
+
+class ConfMessagePair extends DataObject {
+    public ConferenceId Destination;
+    public MessageData Message;
+
+    public ConfMessagePair( final ConferenceId destination,
+            final MessageData message );
+}
+
+class Contact extends DataObject {
+    public ContactName Name;
+    public ContactId Id;
+
+    public Contact( final ContactName name, final ContactId id );
+}
+
+class ContactConfMessagePair extends DataObject {
+    public ContactId Source;
+    public ConfMessagePair Message;
+
+    public ContactConfMessagePair( final ContactId source,
+        final ConfMessagePair message );
+}
+
+class ContactConfPair extends DataObject {
+    public ContactId Contact;
+    public ConferenceId Conference;
+
+    public ContactConfPair( final ContactId contact,
+            final ConferenceId conference );
+}
+
+class ContactId extends DataObject {
+    public UUID Id;
+    public ContactId();
+}
+
+class ContactMessagePair extends DataObject {
+    public ContactId Contact;
+    public MessageData Message;
+
+    public ContactMessagePair( final ContactId contact,
+            final MessageData message );
+}
+
+class ContactName extends DataObject {
+    public String Name;
+    public ContactName( final String name );
+}
+
+class Contacts extends DataObject {
+    public ArrayList< Contact > Contacts;
+
+    public Contacts( ArrayList< Contact > contacts );
+}
+
+interface DataObject extends Serializable {
+}
+
+class File extends DataObject {
+    public FileName Name;
+    public FileData Data;
+
+    public File( final FileName name, final FileData data );
+}
+
+class FileData extends DataObject {
+    public byte[] Data;
+    public FileData( final byte[] data );
+}
+
+class FileId extends DataObject {
+    public UUID Id;
+    public FileId();
+}
+
+class FileIdNamePair extends DataObject {
+    public FileId Id;
+    public FileName Name;
+
+    public FileIdNamePair( final FileId id, final FileName name );
+}
+
+class FileIdNamePairs extends DataObject {
+    public ArrayList< FileIdNamePair > Pairs;
+
+    public FileIdNamePairs( ArrayList< FileIdNamePair > pairs );
+}
+
+class FileName extends DataObject {
+    public String Name;
+    public FileName( String name );
+}
+
+class MessageData extends DataObject {
+    public String Data;
+
+    public MessageData( final String data );
+}
+
+class ResultData implements Serializable {
+    public ResultTypes Type;
+    public DataObject Data;
+
+    public ResultData( final ResultTypes type, final DataObject data );
+}
+
+enum ResultTypes implements Serializable {
+    ContactId,
+    UpdatedContacts,
+    CreatedConference,
+    AddedToNewConference,
+    AddedToConference,
+    AddedConference,
+    RemovedFromConference,
+    DeletedConference,
+    Message,
+    UpdatedFiles,
+    UploadedFile,
+    DownloadedFile,
+    RemovedFile,
+    None
+}
+
+
+@enduml

@@ -1,0 +1,87 @@
+@startuml
+
+interface IClientView {
+    void sendCommand(CommandData command);
+    void onResultReceived(ResultData result);
+}
+
+interface IClientController {
+    void registerMe();
+    void sendUserMessage(String message, ContactId contactId);
+    void sendConferenceMessage(String message, ConferenceId);
+    void sendFile(Bitmap image);
+    void sendFile(java.io.File file);
+
+    void onResultReceived(ResultData result);
+}
+
+interface IClientModel {
+    void registerMe();
+    void sendUserMessage(String message, ContactId contactId);
+    void sendConferenceMessage(String message, ConferenceId);
+    void sendFile(Bitmap image);
+    void sendFile(java.io.File file);
+
+    void updateContacts(List<Contact> contacts);
+    void processNewUserMessage(ContactMessagePair message);
+    void processNewConferenceMessage(ContactConfMessagePair message);
+    void updateFilesList(List<FileIdNamePair> filesInfo);
+    void processReceivedFile(File file);
+}
+
+interface IUserController {
+    void onTouchListener();
+    void onRegisterBtnClickListener();
+    void onSendMessageListener();
+
+    void updateContactList(List<Contact> contacts);
+    void updateMessageList(List<ConfMessagePair> messages);
+    void updateFilesList(List<FileIdNamePair> filesInfo);
+    void showFile(File file);
+}
+
+interface IUserView {
+
+}
+
+class ClientDataTransfer implements IClientView {
+    void sendCommand(CommandData command);
+    void onResultReceived(ResultData result);
+}
+
+class ClientController implements IClientController {
+    void registerMe();
+    void sendUserMessage(String message, ContactId contactId);
+    void sendConferenceMessage(String message, ConferenceId);
+    void sendFile(Bitmap image);
+    void sendFile(java.io.File file);
+
+    void onResultReceived(ResultData result);
+}
+
+class ClientModel implements IClientModel {
+    void registerMe();
+    void sendUserMessage(String message, ContactId contactId);
+    void sendConferenceMessage(String message, ConferenceId);
+    void sendFile(Bitmap image);
+    void sendFile(java.io.File file);
+
+    void updateContacts(List<Contact> contacts);
+    void processNewUserMessage(ContactMessagePair message);
+    void processNewConferenceMessage(ContactConfMessagePair message);
+    void updateFilesList(List<FileIdNamePair> filesInfo);
+    void processReceivedFile(File file);
+}
+
+class UserController implements IUserController {
+    void onTouchListener();
+    void onRegisterBtnClickListener();
+    void onSendMessageListener();
+
+    void updateContactList(List<Contact> contacts);
+    void updateMessageList(List<ConfMessagePair> messages);
+    void updateFilesList(List<FileIdNamePair> filesInfo);
+    void showFile(File file);
+}
+
+@enduml
