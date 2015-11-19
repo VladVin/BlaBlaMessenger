@@ -13,7 +13,7 @@ import data_structures.ResultData;
  * Created by VladVin on 11.05.2015.
  */
 public class Cloud extends Thread {
-    private static final String ipAddress = "192.168.137.253";
+    private static final String ipAddress = "192.168.0.47";
     private static final int port = 4444;
     private Socket socket = null;
     private final ConcurrentLinkedQueue<ResultData> resDataQueue;
