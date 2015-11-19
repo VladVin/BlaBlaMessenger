@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:text="Contacts"
         android:textStyle="bold"
-        android:textSize="@dimen/abc_text_size_large_material"
+        android:textSize="30sp"
         android:id="@+id/title" />
 
     <Button
