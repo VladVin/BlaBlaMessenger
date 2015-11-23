@@ -5,12 +5,12 @@ import java.io.Serializable;
 public class ResultData implements Serializable
 {
     public ResultTypes type;
-    public DataObject  data;
+    public Object      data;
     
     public
     ResultData(
         ResultTypes type,
-        DataObject  data
+        Object      data
     )
     {
         this.type = type;

@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public enum ResultTypes implements Serializable
 {
-    ContactId,
+    ContactID,
     UpdatedContacts,
     CreatedConference,
     AddedToNewConference,
@@ -12,10 +12,10 @@ public enum ResultTypes implements Serializable
     AddedConference,
     RemovedFromConference,
     DeletedConference,
-    Message,
+    MessageToContact,
+    MessageToConference,
     UpdatedFiles,
     UploadedFile,
     DownloadedFile,
-    RemovedFile,
-    None
+    RemovedFile
 }

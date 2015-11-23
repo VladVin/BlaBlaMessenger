@@ -1,19 +1,20 @@
 package data_structures;
 
+import java.io.Serializable;
 import java.util.UUID;
 
-public class ConfMessagePair extends DataObject
+public class ConfMessagePair implements Serializable
 {
-    public UUID   destination;
-    public String message;
-    
+    public UUID   conference;
+    public String text;
+
     public
     ConfMessagePair(
-        UUID   destination,
-        String message
+        UUID   conference,
+        String text
     )
     {
-        this.destination = destination;
-        this.message     = message;
+        this.conference = conference;
+        this.text       = text;
     }
 }

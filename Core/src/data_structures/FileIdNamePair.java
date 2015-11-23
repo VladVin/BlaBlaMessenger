@@ -1,8 +1,9 @@
 package data_structures;
 
+import java.io.Serializable;
 import java.util.UUID;
 
-public class FileIdNamePair extends DataObject
+public class FileIdNamePair implements Serializable
 {
     public UUID   id;
     public String name;

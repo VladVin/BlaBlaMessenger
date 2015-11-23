@@ -1,34 +1,18 @@
 package data_structures;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class Conference extends DataObject
+public class Conference implements Serializable
 {
     public String            name;
-    public UUID              id;
     public ArrayList< UUID > members;
-    
+
     public
-    Conference(
-        String            name,
-        ArrayList< UUID > members
-    )
+    Conference()
     {
-        this.name    = name;
-        this.id      = null;
-        this.members = members;
+        name    = "";
+        members = new ArrayList<>();
     }
-    
-    public void
-    copyConference(
-        Conference conference
-    )
-    {
-        this.name    = conference.name;
-        this.members = conference.members;
-
-        this.id = UUID.randomUUID();
-    }
-
 }

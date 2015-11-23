@@ -1,8 +1,9 @@
 package data_structures;
 
+import java.io.Serializable;
 import java.util.UUID;
 
-public class ContactConfPair extends DataObject
+public class ContactConfPair implements Serializable
 {
     public UUID contact;
     public UUID conference;

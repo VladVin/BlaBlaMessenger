@@ -1,6 +1,8 @@
 package data_structures;
 
-public class File extends DataObject
+import java.io.Serializable;
+
+public class File implements Serializable
 {
     public String name;
     public byte[] data;

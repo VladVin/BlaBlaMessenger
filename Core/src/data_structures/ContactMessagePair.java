@@ -1,19 +1,20 @@
 package data_structures;
 
+import java.io.Serializable;
 import java.util.UUID;
 
-public class ContactMessagePair extends DataObject
+public class ContactMessagePair implements Serializable
 {
     public UUID   contact;
-    public String message;
+    public String text;
     
     public
     ContactMessagePair(
         UUID   contact,
-        String message
+        String text
     )
     {
         this.contact = contact;
-        this.message = message;
+        this.text    = text;
     }
 }
