@@ -3,13 +3,12 @@ package data_structures;
 import java.io.Serializable;
 import java.util.UUID;
 
-public class ContactConfMessagePair implements Serializable
+public class ContactConfMessage implements Serializable
 {
     public UUID            source;
     public ConfMessagePair confMessage;
     
-    public
-    ContactConfMessagePair(
+    public ContactConfMessage(
         UUID            source,
         ConfMessagePair confMessage
     )

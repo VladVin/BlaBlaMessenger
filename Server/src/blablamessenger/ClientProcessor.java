@@ -417,12 +417,12 @@ public class ClientProcessor extends Thread
         Task task
     )
     {
-        if ( !(task.operation.data instanceof ContactConfMessagePair) ) {
+        if ( !(task.operation.data instanceof ContactConfMessage) ) {
             errorLog( "invalid data in command send text to conference" );
             return;
         }
 
-        ContactConfMessagePair message = (ContactConfMessagePair) task.operation.data;
+        ContactConfMessage message = (ContactConfMessage) task.operation.data;
         if ( message.source == null || message.confMessage == null ) {
             errorLog( "id of source or confMessagePair is null" );
             return;
