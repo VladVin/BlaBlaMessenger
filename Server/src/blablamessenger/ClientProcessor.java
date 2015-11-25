@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
@@ -87,22 +88,22 @@ public class ClientProcessor extends Thread
                 addLog( "get send text to conference task" );
                 sendMessageToConference( task );
             break;
-//            case RefreshStorage:
-//                addLog( "get refresh storage task" );
-//                refreshStorage();
-//            break;
-//            case UploadFile:
-//                addLog( "get upload file task" );
-//                uploadFile( task );
-//            break;
-//            case DownloadFile:
-//                addLog( "get download file task" );
-//                downloadFile( task );
-//            break;
-//            case RemoveFile:
-//                addLog( "get remove file task" );
-//                removeFile( task );
-//            break;
+            case RefreshStorage:
+                addLog( "get refresh storage task" );
+                refreshStorage();
+            break;
+            case UploadFile:
+                addLog( "get upload file task" );
+                uploadFile( task );
+            break;
+            case DownloadFile:
+                addLog( "get download file task" );
+                downloadFile( task );
+            break;
+            case RemoveFile:
+                addLog( "get remove file task" );
+                removeFile( task );
+            break;
             default:
                 errorLog( "readed unknown type of command" );
         }
@@ -191,7 +192,7 @@ public class ClientProcessor extends Thread
                 }
                 else {
                     ContactConfPair data = new ContactConfPair( myContactID, conferenceID );
-                    Task task = new Task( Sources.Server, Commands.RemoveFromConference, data );
+                    Task task            = new Task( Sources.Server, Commands.RemoveFromConference, data );
 
                     notifyMembers( task, conference );
                 }
@@ -204,11 +205,7 @@ public class ClientProcessor extends Thread
     private void
     refreshContacts()
     {
-        ArrayList< Contact > contacts = base.getContacts();
-        for ( Contact contact : contacts ) {
-            addLog( contact.name );
-        }
-
+        HashMap< UUID, Contact > contacts = base.getContacts();
         writeResult( new ResultData(ResultTypes.UpdatedContacts, contacts) );
     }
 
@@ -498,60 +495,80 @@ public class ClientProcessor extends Thread
         }
     }
     
-//    private void refreshStorage()
-//    {
-//        FileIdNamePairs files = fileBase.getFiles();
-//        writeResult( new ResultData(ResultTypes.UpdatedFiles, files) );
-//    }
-//
-//
-//    private void uploadFile( Task task )
-//    {
-//        if ( !(task.operation.data instanceof File) ) {
-//            errorLog( "invalid data in command upload file" );
-//            return;
-//        }
-//
-//        File newFile = ( File ) task.Data;
-//        FileId newId = new FileId();
-//
-//        addToBase( newId, newFile );
-//        writeResult( new ResultData(ResultTypes.UploadedFile, newId) );
-//    }
-//    private void addToBase( FileId id, File file )
-//    {
-//        fileBase.addFile( new FileIdNamePair( id, file.Name ) );
-//        fileBase.upload( id, file.Data );
-//    }
-//
-//    private void downloadFile( Task task)
-//    {
-//        if ( !(task.operation.data instanceof UUID) ) {
-//            errorLog( "invalid data in command download file" );
-//            return;
-//        }
-//
-//        FileId file = ( FileId ) task.Data;
-//        writeResult( new ResultData(ResultTypes.DownloadedFile,
-//                fileBase.download( file )) );
-//    }
-//
-//    private void removeFile( Task task)
-//    {
-//        if ( !(task.operation.data instanceof UUID) ) {
-//            errorLog( "invalid data in command upload file" );
-//            return;
-//        }
-//
-//        FileId file = ( FileId ) task.Data;
-//        deleteFromBase( file );
-//        writeResult( new ResultData(ResultTypes.RemovedFile, file) );
-//    }
-//    private void deleteFromBase( FileId file )
-//    {
-//        fileBase.remove( file );
-//        fileBase.removeFile( file );
-//    }
+    private void
+    refreshStorage()
+    {
+        writeResult( new ResultData(ResultTypes.UpdatedFiles, base.getFiles()) );
+    }
+
+
+    private void
+    uploadFile(
+        Task task
+    )
+    {
+        if ( !(task.operation.data instanceof File) ) {
+            errorLog( "invalid data in command upload file" );
+            return;
+        }
+
+        File file = (File) task.operation.data;
+        if ( file.data == null ) {
+            errorLog( "uploading file with null data" );
+            return;
+        }
+
+        if ( file.data.length <= 0 ) {
+            errorLog( "uploading empty file" );
+            return;
+        }
+
+        UUID id = UUID.randomUUID();
+        base.upload( id, file );
+
+        writeResult( new ResultData(ResultTypes.UploadedFile, id) );
+    }
+
+    private void
+    downloadFile(
+        Task task
+    )
+    {
+        if ( !(task.operation.data instanceof UUID) ) {
+            errorLog( "invalid data in command download file" );
+            return;
+        }
+
+        UUID id   = (UUID) task.operation.data;
+        File file = base.download( id );
+
+        if ( file == null ) {
+            errorLog( "downloading not existing file" );
+            return;
+        }
+
+        writeResult( new ResultData(ResultTypes.DownloadedFile, file) );
+    }
+
+    private void
+    removeFile(
+        Task task
+    )
+    {
+        if ( !(task.operation.data instanceof UUID) ) {
+            errorLog( "invalid data in command upload file" );
+            return;
+        }
+
+        UUID id = (UUID) task.operation.data;
+        File file = base.removeFile( id );
+        if ( file == null ) {
+            errorLog( "deleting not existing file" );
+            return;
+        }
+
+        writeResult( new ResultData(ResultTypes.RemovedFile, id) );
+    }
     
     private void
     writeResult(

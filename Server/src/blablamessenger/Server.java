@@ -10,6 +10,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,10 +41,10 @@ public class Server extends Thread
             return contacts.remove( contact );
         }
 
-        public ArrayList< Contact >
+        public HashMap< UUID, Contact >
         getContacts()
         {
-            return new ArrayList<>( contacts.values() );
+            return new HashMap<>( contacts );
         }
         
         public void
@@ -113,7 +114,7 @@ public class Server extends Thread
         }
 
         public File
-        remove(
+        removeFile(
             UUID id
         )
         {
@@ -161,7 +162,8 @@ public class Server extends Thread
             }
             
             release( serverSocket );     
-        } catch ( IOException ex ) {
+        }
+        catch ( IOException ex ) {
             Logger.getLogger( Server.class.getName() ).log( Level.SEVERE, null, ex );
         }
     }
@@ -182,7 +184,8 @@ public class Server extends Thread
         addLog( "server shutting down" );
         try {
             socket.close();
-        } catch ( IOException ex ) {
+        }
+        catch ( IOException ex ) {
             Logger.getLogger( Server.class.getName() ).log( Level.SEVERE, null, ex );
         }
 
