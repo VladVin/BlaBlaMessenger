@@ -1,8 +1,9 @@
 package coreutilities;
 
+import java.io.Serializable;
 import java.util.UUID;
 
-public class Contact
+public class Contact implements Serializable
 {
     public UUID        id;
     public ContactData data;

@@ -1,9 +1,10 @@
 package coreutilities;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class Conference
+public class Conference implements Serializable
 {
     public UUID           id;
     public ConferenceData data;
