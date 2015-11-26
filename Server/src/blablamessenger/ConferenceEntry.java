@@ -1,7 +1,22 @@
 package blablamessenger;
 
-/**
- * Created by glebg on 27.11.2015.
- */
-public class ConferenceEntry {
+import coreutilities.Conference;
+
+import java.util.UUID;
+
+public class ConferenceEntry
+{
+    public UUID       contact;
+    public Conference conference;
+
+    public
+    ConferenceEntry(
+        UUID contact,
+        Conference conference
+    )
+    {
+        this.contact    = contact;
+        this.conference = conference;
+    }
+
 }

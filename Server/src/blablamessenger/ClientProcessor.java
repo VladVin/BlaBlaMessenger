@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
@@ -127,14 +126,13 @@ public class ClientProcessor extends Thread
     )
     {
         if ( !(task.operation.data instanceof String) ) {
-            errorLog( "invalid data in command register contact" );
+            errorLog( "invalid data in command register contactData" );
             return;
         }
 
-        String  name    = (String) task.operation.data;
-        Contact contact = new Contact( name );
+        String  name = (String) task.operation.data;
 
-        base.addContact( myContactID, contact );
+        base.addContact( myContactID, new ContactData(name) );
 
         writeResult( new ResultData(ResultTypes.ContactID, myContactID) );
     }
@@ -176,13 +174,13 @@ public class ClientProcessor extends Thread
     deleteMyConferences()
     {
         for ( UUID conferenceID : myConferences ) {
-            ConcurrentConference conference = base.getConference( conferenceID );
+            ConcurrentConferenceData conference = base.getConference( conferenceID );
             if ( conference == null ) {
                 continue;
             }
 
             synchronized ( conference.lock ) {
-                if ( !conference.members.remove( myContactID ) ) {
+                if ( !conference.members.remove(myContactID) ) {
                     errorLog( "Removing myself from other conference" );
                     continue;
                 }
@@ -205,7 +203,7 @@ public class ClientProcessor extends Thread
     private void
     refreshContacts()
     {
-        HashMap< UUID, Contact > contacts = base.getContacts();
+        ArrayList< Contact > contacts = base.getContacts();
         writeResult( new ResultData(ResultTypes.UpdatedContacts, contacts) );
     }
 
@@ -214,40 +212,48 @@ public class ClientProcessor extends Thread
         Task task
     )
     {
-        if ( !(task.operation.data instanceof Conference) ) {
-            errorLog( "invalid data in command create conference" );
-            return;
-        }
-
-        ConcurrentConference conference = new ConcurrentConference( (Conference) task.operation.data );
-        if ( conference.members == null ) {
-            errorLog( "null members in conference" );
-            return;
-        }
-
-        if ( conference.members.isEmpty() ) {
-            errorLog( "empty conference" );
-            return;
-        }
-
-        ResultData result = null;
-        UUID conferenceID = UUID.randomUUID();
-
         if ( task.source == Sources.Client ) {
-            base.addConference( conferenceID, conference );
-
-            synchronized ( conference.lock ) {
-                notifyMembers( new Task(Sources.Server, task.operation), conference, myContactID );
+            if ( !(task.operation.data instanceof ConferenceData) ) {
+                errorLog( "invalid data in command create conference from client" );
+                return;
             }
 
-            result = new ResultData( ResultTypes.CreatedConference, conferenceID );
+            ConcurrentConferenceData conference = new ConcurrentConferenceData( (ConferenceData) task.operation.data );
+            if ( conference.members == null ) {
+                errorLog( "null members in conference" );
+                return;
+            }
+
+            if ( conference.members.isEmpty() ) {
+                errorLog( "empty conference" );
+                return;
+            }
+
+            UUID conferenceID = UUID.randomUUID();
+            base.addConference( conferenceID, conference );
+
+            Conference newConference = new Conference( conferenceID, (ConferenceData) task.operation.data );
+            Task notify = new Task( Sources.Server, Commands.CreateConference, newConference );
+
+            synchronized ( conference.lock ) {
+                notifyMembers( notify, conference, myContactID );
+            }
+
+            myConferences.add( conferenceID );
+
+            writeResult( new ResultData(ResultTypes.CreatedConference, conferenceID) );
         }
         else if ( task.source == Sources.Server ) {
-            result = new ResultData( ResultTypes.AddedToNewConference, conference );
-        }
+            if ( !(task.operation.data instanceof Conference) ) {
+                errorLog( "invalid data in command create conference from Server" );
+                return;
+            }
 
-        writeResult( result );
-        myConferences.add( conferenceID );
+            Conference conference = (Conference) task.operation.data;
+            myConferences.add( conference.id );
+
+            writeResult( new ResultData(ResultTypes.AddedToNewConference, conference) );
+        }
     }
 
     private void
@@ -255,49 +261,62 @@ public class ClientProcessor extends Thread
         Task task
     )
     {
-        if ( !(task.operation.data instanceof ContactConfPair) ) {
-            errorLog( "invalid data in command add to conference" );
-            return;
-        }
-
-        ContactConfPair newMember = (ContactConfPair) task.operation.data;
-        if ( newMember.contact == null || newMember.conference == null ) {
-            errorLog( "id of contact or conference is null" );
-            return;
-        }
-
-        ResultData result = null;
-
         if ( task.source == Sources.Client ) {
+            if ( !(task.operation.data instanceof ContactConfPair) ) {
+                errorLog( "invalid data in command add to conference from client" );
+                return;
+            }
+
+            ContactConfPair newMember = (ContactConfPair) task.operation.data;
+            if ( newMember.contact == null || newMember.conference == null ) {
+                errorLog( "id of contact or conference is null" );
+                return;
+            }
+
             if ( newMember.contact.equals(myContactID) ) {
                 errorLog( "add to conference myself" );
                 return;
             }
 
-            Conference target = base.getConference( newMember.conference );
-            if ( target == null ) {
-                errorLog( "null conference in command add to conference" );
+            ConcurrentConferenceData conference = base.getConference( newMember.conference );
+            if ( conference == null ) {
+                errorLog( "invalid conference id in command add to conference" );
                 return;
             }
 
-            ConcurrentConference conference = new ConcurrentConference( target );
             synchronized ( conference.lock ) {
                 conference.members.add( newMember.contact );
-                notifyMembers( new Task(Sources.Server, task.operation), conference );
+
+                Conference newConference = new Conference( newMember.conference, conference.name, conference.members );
+                ConferenceEntry notifyData = new ConferenceEntry( newMember.contact, newConference );
+                Task notify = new Task( Sources.Server, Commands.AddToConference, notifyData );
+
+                notifyMembers( notify, conference, myContactID );
             }
 
-            result = new ResultData( ResultTypes.AddedToConference, newMember );
-        } else if ( task.source == Sources.Server ) {
-            if ( newMember.contact.equals(myContactID) ) {
-                myConferences.add( newMember.conference );
-                result = new ResultData( ResultTypes.AddedConference, newMember.conference );
+            writeResult( new ResultData(ResultTypes.AddedToConference, newMember) );
+        }
+        else if ( task.source == Sources.Server ) {
+            if ( !(task.operation.data instanceof ConferenceEntry) ) {
+                errorLog( "invalid data in command add to conference from server" );
+                return;
+            }
+
+            ConferenceEntry entry = (ConferenceEntry) task.operation.data;
+            if ( entry.contact == null || entry.conference == null ) {
+                errorLog( "contact or conference is null in command add to conference from server" );
+                return;
+            }
+
+            if ( entry.contact.equals(myContactID) ) {
+                myConferences.add( entry.conference.id );
+                writeResult( new ResultData( ResultTypes.AddedConference, entry.conference ) );
             }
             else {
-                result = new ResultData( ResultTypes.AddedToConference, newMember );
+                ContactConfPair newMember = new ContactConfPair( entry.contact, entry.conference.id );
+                writeResult( new ResultData( ResultTypes.AddedToConference, newMember ) );
             }
         }
-
-        writeResult( result );
     }
 
     private void
@@ -319,7 +338,7 @@ public class ClientProcessor extends Thread
         if ( remove.contact.equals( myContactID ) ) {
             myConferences.remove( remove.conference );
 
-            ConcurrentConference conference = base.getConference( remove.conference );
+            ConcurrentConferenceData conference = base.getConference( remove.conference );
             if ( conference == null ) {
                 errorLog( "removing from not existing conference" );
                 return;
@@ -361,7 +380,7 @@ public class ClientProcessor extends Thread
         }
 
         if ( task.source == Sources.Client ) {
-            ConcurrentConference conference = base.removeConference( conferenceID );
+            ConcurrentConferenceData conference = base.removeConference( conferenceID );
             if ( conference == null ) {
                 errorLog( "deleting not existing conference" );
                 return;
@@ -434,7 +453,7 @@ public class ClientProcessor extends Thread
         }
         
         if ( task.source == Sources.Client ) {
-            ConcurrentConference conference = base.getConference( message.confMessage.conference );
+            ConcurrentConferenceData conference = base.getConference( message.confMessage.conference );
             if ( conference == null ) {
                 errorLog( "message to not existing conference" );
                 return;
@@ -451,14 +470,14 @@ public class ClientProcessor extends Thread
     private void
     notifyMembers(
         Task       task,
-        Conference conference
+        ConferenceData conferenceData
     )
     {
-        if ( task == null || conference == null ) {
+        if ( task == null || conferenceData == null ) {
             return;
         }
 
-        for ( UUID contact : conference.members ) {
+        for ( UUID contact : conferenceData.members ) {
             ClientReceiver receiver = base.getClient( contact );
             if ( receiver == null ) {
                 errorLog( "receiver on id" + contact.toString() + " is null" );
@@ -472,15 +491,15 @@ public class ClientProcessor extends Thread
     private void
     notifyMembers(
         Task       task,
-        Conference conference,
+        ConferenceData conferenceData,
         UUID       mask
     )
     {
-        if ( task == null || conference == null ) {
+        if ( task == null || conferenceData == null ) {
             return;
         }
 
-        for ( UUID contact : conference.members ) {
+        for ( UUID contact : conferenceData.members ) {
             if ( mask.equals( contact ) ) {
                 continue;
             }
@@ -507,24 +526,24 @@ public class ClientProcessor extends Thread
         Task task
     )
     {
-        if ( !(task.operation.data instanceof File) ) {
-            errorLog( "invalid data in command upload file" );
+        if ( !(task.operation.data instanceof FileData) ) {
+            errorLog( "invalid data in command upload fileData" );
             return;
         }
 
-        File file = (File) task.operation.data;
-        if ( file.data == null ) {
-            errorLog( "uploading file with null data" );
+        FileData fileData = (FileData) task.operation.data;
+        if ( fileData.data == null ) {
+            errorLog( "uploading fileData with null data" );
             return;
         }
 
-        if ( file.data.length <= 0 ) {
-            errorLog( "uploading empty file" );
+        if ( fileData.data.length <= 0 ) {
+            errorLog( "uploading empty fileData" );
             return;
         }
 
         UUID id = UUID.randomUUID();
-        base.upload( id, file );
+        base.upload( id, fileData );
 
         writeResult( new ResultData(ResultTypes.UploadedFile, id) );
     }
@@ -535,19 +554,19 @@ public class ClientProcessor extends Thread
     )
     {
         if ( !(task.operation.data instanceof UUID) ) {
-            errorLog( "invalid data in command download file" );
+            errorLog( "invalid data in command download fileData" );
             return;
         }
 
-        UUID id   = (UUID) task.operation.data;
-        File file = base.download( id );
+        UUID id = (UUID) task.operation.data;
+        FileData fileData = base.download( id );
 
-        if ( file == null ) {
-            errorLog( "downloading not existing file" );
+        if ( fileData == null ) {
+            errorLog( "downloading not existing fileData" );
             return;
         }
 
-        writeResult( new ResultData(ResultTypes.DownloadedFile, file) );
+        writeResult( new ResultData(ResultTypes.DownloadedFile, fileData) );
     }
 
     private void
@@ -556,14 +575,14 @@ public class ClientProcessor extends Thread
     )
     {
         if ( !(task.operation.data instanceof UUID) ) {
-            errorLog( "invalid data in command upload file" );
+            errorLog( "invalid data in command upload fileData" );
             return;
         }
 
         UUID id = (UUID) task.operation.data;
-        File file = base.removeFile( id );
-        if ( file == null ) {
-            errorLog( "deleting not existing file" );
+        FileData fileData = base.removeFile( id );
+        if ( fileData == null ) {
+            errorLog( "deleting not existing fileData" );
             return;
         }
 

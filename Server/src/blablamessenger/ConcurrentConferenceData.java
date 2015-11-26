@@ -10,8 +10,7 @@ public class ConcurrentConferenceData extends ConferenceData
         ConferenceData conferenceData
     )
     {
-        this.name    = conferenceData.name;
-        this.members = conferenceData.members;
+        super( conferenceData.name, conferenceData.members );
     }
 
 

@@ -1,20 +1,18 @@
 package blablamessenger;
 
 import blablamessenger.Task.Sources;
-import coreutilities.Commands;
-import coreutilities.Contact;
-import coreutilities.File;
+import coreutilities.*;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class Server extends Thread
 {
@@ -26,14 +24,14 @@ public class Server extends Thread
     {
         public void
         addContact(
-            UUID    id,
-            Contact contact
+            UUID        id,
+            ContactData contactData
         )
         {
-            contacts.put( id, contact );
+            contacts.put( id, contactData );
         }
 
-        public Contact
+        public ContactData
         removeContact(
             UUID contact
         )
@@ -41,22 +39,23 @@ public class Server extends Thread
             return contacts.remove( contact );
         }
 
-        public HashMap< UUID, Contact >
+        public ArrayList< Contact >
         getContacts()
         {
-            return new HashMap<>( contacts );
+            return contacts.entrySet().stream().map( entry -> new Contact(entry.getKey(), entry.getValue()) ).
+                collect( Collectors.toCollection(ArrayList::new) );
         }
         
         public void
         addConference(
-            UUID                 id,
-            ConcurrentConference conference
+            UUID                     id,
+            ConcurrentConferenceData conference
         )
         {
             conferences.put( id, conference );
         }
 
-        public ConcurrentConference
+        public ConcurrentConferenceData
         removeConference(
             UUID conference
         )
@@ -64,7 +63,7 @@ public class Server extends Thread
             return conferences.remove( conference );
         }
 
-        public ConcurrentConference
+        public ConcurrentConferenceData
         getConference(
             UUID conference
         )
@@ -99,13 +98,13 @@ public class Server extends Thread
         public void
         upload(
             UUID id,
-            File file
+            FileData fileData
         )
         {
-            files.put( id, file );
+            files.put( id, fileData);
         }
 
-        public File
+        public FileData
         download(
             UUID id
         )
@@ -113,7 +112,7 @@ public class Server extends Thread
             return files.get( id );
         }
 
-        public File
+        public FileData
         removeFile(
             UUID id
         )
@@ -124,13 +123,14 @@ public class Server extends Thread
         public ArrayList< File >
         getFiles()
         {
-            return new ArrayList<>( files.values() );
+            return files.entrySet().stream().map( entry -> new File(entry.getKey(), entry.getValue()) ).
+                collect( Collectors.toCollection(ArrayList::new) );
         }
         
-        private final ConcurrentHashMap< UUID, Contact              > contacts    = new ConcurrentHashMap<>();
-        private final ConcurrentHashMap< UUID, ConcurrentConference > conferences = new ConcurrentHashMap<>();
-        private final ConcurrentHashMap< UUID, ClientReceiver       > clients     = new ConcurrentHashMap<>();
-        private final ConcurrentHashMap< UUID, File                 > files       = new ConcurrentHashMap<>();
+        private final ConcurrentHashMap< UUID, ContactData              > contacts    = new ConcurrentHashMap<>();
+        private final ConcurrentHashMap< UUID, ConcurrentConferenceData > conferences = new ConcurrentHashMap<>();
+        private final ConcurrentHashMap< UUID, ClientReceiver           > clients     = new ConcurrentHashMap<>();
+        private final ConcurrentHashMap< UUID, FileData                 > files       = new ConcurrentHashMap<>();
     }
     
     @Override
@@ -157,7 +157,7 @@ public class Server extends Thread
                     base.addClient( newClientID, client );
                 }
                 catch ( SocketTimeoutException e ) {
-                    addLog( "Timout on waiting new client" );
+                    addLog( "Timeout on waiting new client" );
                 }
             }
             
