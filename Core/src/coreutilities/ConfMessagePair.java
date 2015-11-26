@@ -1,4 +1,4 @@
-package data_structures;
+package coreutilities;
 
 import java.io.Serializable;
 import java.util.UUID;
