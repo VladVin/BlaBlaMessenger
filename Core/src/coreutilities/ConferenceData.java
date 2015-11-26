@@ -9,9 +9,12 @@ public class ConferenceData implements Serializable
     public String            name;
     public ArrayList< UUID > members;
 
-    public ConferenceData()
+    public ConferenceData(
+        String            name,
+        ArrayList< UUID > members
+    )
     {
-        name    = "";
-        members = new ArrayList<>();
+        this.name    = name;
+        this.members = members;
     }
 }
