@@ -1,19 +1,19 @@
 package coreutilities;
 
-import java.io.Serializable;
+import java.util.UUID;
 
-public class File implements Serializable
+public class File
 {
-    public String name;
-    public byte[] data;
-    
+    public UUID     id;
+    public FileData data;
+
     public
     File(
-        String name,
-        byte[] data
+        UUID     id,
+        FileData data
     )
     {
-        this.name = name;
+        this.id   = id;
         this.data = data;
     }
 }

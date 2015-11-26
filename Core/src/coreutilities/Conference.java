@@ -1,18 +1,31 @@
 package coreutilities;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class Conference implements Serializable
+public class Conference
 {
-    public String            name;
-    public ArrayList< UUID > members;
+    public UUID           id;
+    public ConferenceData data;
 
     public
-    Conference()
+    Conference(
+        UUID              id,
+        String            name,
+        ArrayList< UUID > members
+    )
     {
-        name    = "";
-        members = new ArrayList<>();
+        this.id   = id;
+        this.data = new ConferenceData( name, members );
+    }
+
+    public
+    Conference(
+        UUID           id,
+        ConferenceData data
+    )
+    {
+        this.id   = id;
+        this.data = data;
     }
 }

@@ -1,16 +1,19 @@
 package coreutilities;
 
-import java.io.Serializable;
+import java.util.UUID;
 
-public class Contact implements Serializable
+public class Contact
 {
-    public String name;
-    
+    public UUID        id;
+    public ContactData data;
+
     public
     Contact(
-        String name
+        UUID        id,
+        ContactData data
     )
     {
-        this.name = name;
+        this.id   = id;
+        this.data = data;
     }
 }
