@@ -1,7 +1,7 @@
 package blablamessenger;
 
-import data_structures.CommandData;
-import data_structures.Commands;
+import coreutilities.CommandData;
+import coreutilities.Commands;
 
 public class Task
 {
@@ -35,7 +35,7 @@ public class Task
         this.operation = new CommandData( operation, data );
     }
 
-    public Commands
+    public coreutilities.Commands
     getCommand()
     {
         if ( operation == null ) {

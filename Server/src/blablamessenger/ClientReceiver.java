@@ -2,9 +2,8 @@ package blablamessenger;
 
 import blablamessenger.Task.Sources;
 import blablamessenger.Server.Base;
-
-import data_structures.CommandData;
-import data_structures.Commands;
+import coreutilities.CommandData;
+import coreutilities.Commands;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

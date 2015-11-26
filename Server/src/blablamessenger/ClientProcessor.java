@@ -2,7 +2,7 @@ package blablamessenger;
 
 import blablamessenger.Task.Sources;
 import blablamessenger.Server.Base;
-import data_structures.*;
+import coreutilities.*;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -105,7 +105,7 @@ public class ClientProcessor extends Thread
                 removeFile( task );
             break;
             default:
-                errorLog( "readed unknown type of command" );
+                errorLog( "read unknown type of command" );
         }
     }
     

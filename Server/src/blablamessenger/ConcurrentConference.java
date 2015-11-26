@@ -1,6 +1,6 @@
 package blablamessenger;
 
-import data_structures.Conference;
+import coreutilities.Conference;
 
 import java.util.UUID;
 

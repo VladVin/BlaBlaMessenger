@@ -1,9 +1,9 @@
 package blablamessenger;
 
 import blablamessenger.Task.Sources;
-import data_structures.Commands;
-import data_structures.Contact;
-import data_structures.File;
+import coreutilities.Commands;
+import coreutilities.Contact;
+import coreutilities.File;
 
 import java.io.IOException;
 import java.net.ServerSocket;
