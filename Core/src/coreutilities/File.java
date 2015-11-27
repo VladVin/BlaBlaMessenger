@@ -6,15 +6,15 @@ import java.util.UUID;
 public class File implements Serializable
 {
     public UUID     id;
-    public FileData data;
+    public FileData fileData;
 
     public
     File(
         UUID     id,
-        FileData data
+        FileData fileData
     )
     {
-        this.id   = id;
-        this.data = data;
+        this.id       = id;
+        this.fileData = fileData;
     }
 }
