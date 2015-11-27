@@ -18,5 +18,4 @@ public class ConferenceEntry
         this.contact    = contact;
         this.conference = conference;
     }
-
 }

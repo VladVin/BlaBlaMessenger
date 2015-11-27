@@ -123,7 +123,8 @@ public class Server extends Thread
         public ArrayList< File >
         getFiles()
         {
-            return files.entrySet().stream().map( entry -> new File(entry.getKey(), entry.getValue()) ).
+            return files.entrySet().stream().map( entry ->
+                new File(entry.getKey(), new FileData(entry.getValue().name, null)) ).
                 collect( Collectors.toCollection(ArrayList::new) );
         }
         
