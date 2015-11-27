@@ -7,7 +7,7 @@ public class ServerFrame extends javax.swing.JFrame
         Off.setEnabled( false );
     }
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    // <editor-fold default state="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         On = new java.awt.Button();
@@ -19,19 +19,11 @@ public class ServerFrame extends javax.swing.JFrame
         On.setActionCommand("On");
         On.setLabel("Вкл.");
         On.setName("On"); // NOI18N
-        On.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                OnActionPerformed(evt);
-            }
-        });
+        On.addActionListener(evt -> OnActionPerformed());
 
         Off.setActionCommand("Off");
         Off.setLabel("Выкл.");
-        Off.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                OffActionPerformed(evt);
-            }
-        });
+        Off.addActionListener(evt -> OffActionPerformed());
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -58,23 +50,27 @@ public class ServerFrame extends javax.swing.JFrame
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void OnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OnActionPerformed
+    private void OnActionPerformed() {//GEN-FIRST:event_OnActionPerformed
         On.setEnabled( false );
         Off.setEnabled( true );
-        server = new Server();
+
+        model            = new Model();
+        server           = new Server( new ServerController( model ) );
+
         server.start();
+
     }//GEN-LAST:event_OnActionPerformed
 
-    private void OffActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OffActionPerformed
+    private void OffActionPerformed() {//GEN-FIRST:event_OffActionPerformed
         Off.setEnabled( false );
         On.setEnabled( true );
+
         server.interrupt();
+        model.release();
     }//GEN-LAST:event_OffActionPerformed
 
     public static void main(String args[]) {
-        java.awt.EventQueue.invokeLater(() -> {
-            new ServerFrame().setVisible( true );
-        });
+        java.awt.EventQueue.invokeLater(() -> new ServerFrame().setVisible( true ));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -82,4 +78,5 @@ public class ServerFrame extends javax.swing.JFrame
     private java.awt.Button On;
     // End of variables declaration//GEN-END:variables
     private Server server;
+    private Model  model;
 }
