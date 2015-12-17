@@ -1,11 +1,10 @@
-package client_data_transfer;
+package data_transfer;
 
-import client_controller.IClientController;
 import coreutilities.CommandData;
 
 /**
  * Created by VladVin on 18.12.2015.
  */
-public interface IClientDataTransfer {
+public interface IDataTransfer {
     void sendCommand(CommandData commandData);
 }
