@@ -1,15 +1,16 @@
 package java_laba.blablamessengerclient;
 
-import data_structures.ContactId;
+
+import java.util.UUID;
 
 /**
  * Created by VladVin on 23.05.2015.
  */
 public class ConversationContactsPair {
-    public ContactId me;
-    public ContactId friend;
+    public UUID me;
+    public UUID friend;
 
-    public ConversationContactsPair(ContactId meId, ContactId friendId) {
+    public ConversationContactsPair(UUID meId, UUID friendId) {
         me = meId;
         friend = friendId;
     }

@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 public enum ResultTypes implements Serializable
 {
+    None,
     ContactID,
     UpdatedContacts,
     CreatedConference,

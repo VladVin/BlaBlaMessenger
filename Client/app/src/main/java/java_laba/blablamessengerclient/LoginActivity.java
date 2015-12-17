@@ -14,9 +14,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
 import cloud.Cloud;
-import data_structures.CommandData;
-import data_structures.Commands;
-import data_structures.ContactName;
+
+
+import coreutilities.CommandData;
+import coreutilities.Commands;
 import list_adapters_and_updaters.CloudCreator;
 
 import static android.widget.Toast.LENGTH_LONG;

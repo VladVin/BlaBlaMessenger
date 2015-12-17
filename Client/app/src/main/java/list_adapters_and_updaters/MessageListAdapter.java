@@ -14,9 +14,8 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import data_structures.Contact;
-import data_structures.ContactMessagePair;
-import data_structures.MessageData;
+
+import coreutilities.ContactMessagePair;
 import java_laba.blablamessengerclient.ConversationContactsPair;
 import java_laba.blablamessengerclient.R;
 
@@ -41,7 +40,7 @@ public class MessageListAdapter extends BaseAdapter {
         TextView contactInfo = null;
         // TODO: Show various messages with various color
         if (convertView == null)
-            if (messagePair.Contact.Id == mDialog.me.Id) {
+            if (messagePair.contact.id == mDialog.me) {
                 convertView = mLayoutInflater.inflate(R.layout.message_list_item, parent, false);
                 contactInfo = (TextView) convertView.findViewById(R.id.messageLine);
             }
@@ -51,7 +50,7 @@ public class MessageListAdapter extends BaseAdapter {
             }
         if (contactInfo != null)
             if (messagePair != null)
-                contactInfo.setText(messagePair.Message.Data);
+                contactInfo.setText(messagePair.text);
             else contactInfo.setText("There is no messages");
 
         return convertView;

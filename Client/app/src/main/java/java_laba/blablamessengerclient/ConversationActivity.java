@@ -15,21 +15,21 @@ import java.util.ArrayList;
 
 import cloud.Cloud;
 import data_storage.DataStorage;
-import data_structures.CommandData;
-import data_structures.Commands;
-import data_structures.Contact;
-import data_structures.ContactId;
-import data_structures.ContactMessagePair;
-import data_structures.MessageData;
-import data_structures.ResultData;
-import data_structures.ResultTypes;
+
+
+
+
+
+
+
+
 import list_adapters_and_updaters.MessageListAdapter;
 
 
 public class ConversationActivity extends ActionBarActivity {
 
-    private ContactId myContactId = null;
-    private ContactId friendContactId = null;
+    private UUID myUUID = null;
+    private UUID friendUUID = null;
     private MessageListAdapter messageListAdapter = null;
     private Cloud cloud = null;
     private DataUpdaterTask dataUpdaterTask = null;
@@ -39,8 +39,8 @@ public class ConversationActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversation);
 
-        myContactId = GeneralData.conversationContactsPair.me;
-        friendContactId = GeneralData.conversationContactsPair.friend;
+        myUUID = GeneralData.conversationContactsPair.me;
+        friendUUID = GeneralData.conversationContactsPair.friend;
         cloud = GeneralData.cloud;
 
         ArrayList<ContactMessagePair> tMessages = chooseMessages(cloud.getStorage().getMessages());
@@ -58,7 +58,7 @@ public class ConversationActivity extends ActionBarActivity {
                 String message = messageField.getText().toString();
                 messageField.setText("");
                 if (message.trim().length() != 0) {
-                    ContactMessagePair contactMessagePair = new ContactMessagePair(friendContactId, new MessageData(message));
+                    ContactMessagePair contactMessagePair = new ContactMessagePair(friendUUID, new MessageData(message));
                     CommandData messageCommand = new CommandData(Commands.SendMessageToContact, contactMessagePair);
                     cloud.requestData(messageCommand);
                 }
@@ -107,8 +107,8 @@ public class ConversationActivity extends ActionBarActivity {
         if (messages == null) return null;
         ArrayList<ContactMessagePair> targetMessages = new ArrayList<ContactMessagePair>();
         for (int i = 0; i < messages.size(); i++) {
-            if (messages.get(i).Contact.Id == myContactId.Id ||
-                    messages.get(i).Contact.Id == friendContactId.Id) {
+            if (messages.get(i).Contact.Id == myUUID.Id ||
+                    messages.get(i).Contact.Id == friendUUID.Id) {
                 targetMessages.add(messages.get(i));
             }
         }

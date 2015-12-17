@@ -10,8 +10,8 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-import data_structures.Contact;
-import data_structures.Contacts;
+
+import coreutilities.Contact;
 import java_laba.blablamessengerclient.R;
 
 /**

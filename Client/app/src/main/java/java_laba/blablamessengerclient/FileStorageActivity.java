@@ -13,15 +13,19 @@ import android.widget.Button;
 import android.widget.ListView;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 import ar.com.daidalos.afiledialog.FileChooserDialog;
 import cloud.Cloud;
+import coreutilities.CommandData;
+import coreutilities.Commands;
+import coreutilities.FileIdNamePair;
 import data_storage.DataStorage;
-import data_structures.CommandData;
-import data_structures.Commands;
-import data_structures.Contact;
-import data_structures.ContactId;
-import data_structures.FileIdNamePair;
+
+
+
+
+
 import list_adapters_and_updaters.ContactListAdapter;
 import list_adapters_and_updaters.FileStorageListAdapter;
 
@@ -35,7 +39,7 @@ public class FileStorageActivity extends ActionBarActivity {
     private FileStorageListAdapter filesAdapter = null;
     private DataUpdaterTask dataUpdaterTask = null;
     private CommandSenderTask commandSenderTask = null;
-    private ContactId myContactId = null;
+    private UUID myUUID = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +64,7 @@ public class FileStorageActivity extends ActionBarActivity {
 
         //Check the contact ID
         if (GeneralData.conversationContactsPair != null && GeneralData.conversationContactsPair.me != null) {
-            myContactId = GeneralData.conversationContactsPair.me;
+            myUUID = GeneralData.conversationContactsPair.me;
         }
 
         // Listeners
@@ -191,8 +195,8 @@ public class FileStorageActivity extends ActionBarActivity {
                 public void run() {
                     if (storage != null) {
                         switch (storage.whatUpdated()) {
-                            case ContactId:
-                                myContactId = storage.getContactId();
+                            case ContactID:
+                                myUUID = storage.getUUID();
                                 break;
                             case UpdatedContacts:
                                 storage.getContacts();
