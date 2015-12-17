@@ -6,21 +6,47 @@ import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class ServerController
+public class Controller implements IController
 {
-    public
-    ServerController(
-        Model model
+    public Controller(
+        IModel model
     )
     {
         this.model = model;
     }
 
-    public class Controller extends Thread
+    @Override
+    public void
+    start(
+        ICommunicable                       listener,
+        ConcurrentLinkedQueue< Task       > tasks,
+        ConcurrentLinkedQueue< ResultData > results
+    )
     {
-        public
-        Controller(
-            Listener                            myListener,
+        this.controllerThread = new ControllerThread( listener, tasks, results );
+    }
+
+    @Override
+    public void
+    stop()
+    {
+        controllerThread.myListener.unsubscribe();
+        controllerThread.running = false;
+    }
+
+    @Override
+    public boolean
+    addTask(
+        Task task
+    )
+    {
+        return controllerThread.addTask( task );
+    }
+
+    public class ControllerThread extends Thread
+    {
+        public ControllerThread(
+            ICommunicable                       myListener,
             ConcurrentLinkedQueue< Task >       tasks,
             ConcurrentLinkedQueue< ResultData > results
         )
@@ -29,7 +55,7 @@ public class ServerController
             this.tasks      = tasks;
             this.results    = results;
 
-            running = true;
+            this.running = true;
         }
 
         public boolean
@@ -52,7 +78,7 @@ public class ServerController
         public void
         run()
         {
-            while ( running ) {
+            while ( isRunning() ) {
                 execute( getTask() );
             }
         }
@@ -78,28 +104,26 @@ public class ServerController
 
             switch ( task.getCommand() ) {
                 case RegisterContact:
-                    if ( (result = model.registerContact( task, this )) == null ) return;
+                    if ( (result = model.registerContact( task, getMyController() )) == null ) return;
                     myID = (UUID) result.data;
                 break;
                 case Disconnect:
-                    if ( !model.disconnect(myID, myConferences) ) errorLog( "error on disconnecting" );
-                    myListener.close();
-                    running = false;
+                    if ( (result = model.disconnect(myID, myConferences)) == null ) return;
                 break;
                 case RefreshContacts:
                     if ( (result = model.refreshContacts()) == null ) return;
                 break;
                 case CreateConference:
-                    if ( (result = model.createConference       ( task, myID, myConferences )) == null ) return;
+                    if ( (result = model.createConference( task, myID, myConferences )) == null ) return;
                 break;
                 case AddToConference:
-                    if ( (result = model.addToConference        ( task, myID, myConferences )) == null ) return;
+                    if ( (result = model.addToConference( task, myID, myConferences )) == null ) return;
                 break;
                 case RemoveFromConference:
-                    if ( (result = model.removeFromConference   ( task, myID, myConferences )) == null ) return;
+                    if ( (result = model.removeFromConference( task, myID, myConferences )) == null ) return;
                 break;
                 case DeleteConference:
-                    if ( (result = model.deleteConference       ( task, myID, myConferences )) == null ) return;
+                    if ( (result = model.deleteConference( task, myID, myConferences )) == null ) return;
                 break;
                 case SendMessageToConference:
                     if ( (result = model.sendMessageToConference( task, myID, myConferences )) == null ) return;
@@ -131,7 +155,7 @@ public class ServerController
             String log
         )
         {
-            System.out.println( Controller.class.getName() + ": " + log );
+            System.out.println( ControllerThread.class.getName() + ": " + log );
         }
 
         private void
@@ -148,10 +172,16 @@ public class ServerController
             }
         }
 
+        public boolean
+        isRunning()
+        {
+            return running;
+        }
+
         private boolean running = false;
 
         private       UUID              myID;
-        private final Listener          myListener;
+        private final ICommunicable     myListener;
         private final ArrayList< UUID > myConferences = new ArrayList<>();
 
 
@@ -159,5 +189,12 @@ public class ServerController
         private final ConcurrentLinkedQueue< ResultData > results;
      }
 
-    private final Model model;
+    private IController
+    getMyController()
+    {
+        return Controller.this;
+    }
+
+    private final IModel model;
+    private ControllerThread controllerThread;
 }

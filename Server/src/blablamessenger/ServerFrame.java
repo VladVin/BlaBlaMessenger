@@ -54,10 +54,13 @@ public class ServerFrame extends javax.swing.JFrame
         On.setEnabled( false );
         Off.setEnabled( true );
 
-        model            = new Model();
-        server           = new Server( new ServerController( model ) );
+        BaseFactory baseFactory = new BaseFactory();
+        IBase base = baseFactory.create( BaseImplementations.Default );
 
-        server.start();
+        ConnectibleFactory connectibleFactory = new ConnectibleFactory( base );
+        connection = connectibleFactory.create( ConnectibleImplementations.Default );
+
+        connection.connect( 2671 );
 
     }//GEN-LAST:event_OnActionPerformed
 
@@ -65,8 +68,7 @@ public class ServerFrame extends javax.swing.JFrame
         Off.setEnabled( false );
         On.setEnabled( true );
 
-        server.interrupt();
-        model.release();
+        connection.disconnect();
     }//GEN-LAST:event_OffActionPerformed
 
     public static void main(String args[]) {
@@ -77,6 +79,5 @@ public class ServerFrame extends javax.swing.JFrame
     private java.awt.Button Off;
     private java.awt.Button On;
     // End of variables declaration//GEN-END:variables
-    private Server server;
-    private Model  model;
+    private IConnectible connection;
 }

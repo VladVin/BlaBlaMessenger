@@ -10,16 +10,16 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class Listener
+public class Listener implements ICommunicable
 {
     public
     Listener(
-        ServerController serverController,
-        Socket           client
+        IController controller,
+        Socket      client
     )
     {
-        this.serverController = serverController;
-        this.client           = client;
+        this.controller = controller;
+        this.client     = client;
     }
 
     public boolean
@@ -30,17 +30,19 @@ public class Listener
         return tasks.add( task );
     }
 
+    @Override
     public void
     subscribe()
     {
         new Receiver().start();
         new Sender  ().start();
 
-        serverController.new Controller( this, tasks, results );
+        controller.start( this, tasks, results );
     }
 
+    @Override
     public void
-    close()
+    unsubscribe()
     {
         try {
             if ( !client.isInputShutdown() ) {
@@ -205,8 +207,8 @@ public class Listener
         System.out.println( Listener.class.getName() + ": " + log );
     }
 
-    private final Socket           client;
-    private final ServerController serverController;
+    private final Socket      client;
+    private final IController controller;
 
     private final ConcurrentLinkedQueue< Task       > tasks   = new ConcurrentLinkedQueue<>();
     private final ConcurrentLinkedQueue< ResultData > results = new ConcurrentLinkedQueue<>();

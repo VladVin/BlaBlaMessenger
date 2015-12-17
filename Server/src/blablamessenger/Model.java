@@ -1,159 +1,32 @@
 package blablamessenger;
 
-import blablamessenger.ServerController.Controller;
 import coreutilities.*;
 import blablamessenger.Task.Sources;
 
 import java.util.ArrayList;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
-public class Model
+public class Model implements IModel
 {
     public
-    Model()
-    {
-        this.running = true;
-    }
-    private class
-    Base
-    {
-        public ContactData
-        addContact(
-            UUID        id,
-            ContactData contact
-        )
-        {
-            if ( !running ) {
-                return null;
-            }
-
-            return contacts.putIfAbsent( id, contact );
-        }
-
-        public ContactData
-        removeContact(
-            UUID contactID
-        )
-        {
-            return contacts.remove( contactID );
-        }
-
-        public ArrayList< Contact >
-        getContacts()
-        {
-            return contacts.entrySet().stream().map( entry -> new Contact(entry.getKey(), entry.getValue()) ).
-                collect( Collectors.toCollection(ArrayList::new) );
-        }
-
-        public ConcurrentConferenceData
-        addConference(
-            UUID                     id,
-            ConcurrentConferenceData conference
-        )
-        {
-            if ( !running ) {
-                return null;
-            }
-
-            return conferences.putIfAbsent( id, conference );
-        }
-
-        public ConcurrentConferenceData
-        removeConference(
-            UUID conferenceID
-        )
-        {
-            return conferences.remove( conferenceID );
-        }
-
-        public ConcurrentConferenceData
-        getConference(
-            UUID conferenceID
-        )
-        {
-            return conferences.get( conferenceID );
-        }
-
-        public Controller
-        addController(
-            UUID       id,
-            Controller controller
-        )
-        {
-            if ( !running ) {
-                return null;
-            }
-
-            return controllers.putIfAbsent( id, controller );
-        }
-
-        public Controller
-        removeController(
-            UUID controllerID
-        )
-        {
-            return controllers.remove( controllerID );
-        }
-
-        public Controller
-        getController(
-            UUID controllerID
-        )
-        {
-            return controllers.get( controllerID );
-        }
-
-        public void
-        upload(
-            UUID     id,
-            FileData fileData
-        )
-        {
-            if ( !running ) {
-                return;
-            }
-
-            files.put( id, fileData );
-        }
-
-        public FileData
-        download(
-            UUID id
-        )
-        {
-            return files.get( id );
-        }
-
-        public FileData
-        removeFile(
-            UUID id
-        )
-        {
-            return files.remove( id );
-        }
-
-        public ArrayList< File >
-        getFiles()
-        {
-            return files.entrySet().stream().map(
-                entry -> new File( entry.getKey(), new FileData(entry.getValue().name, null) )
-            ).collect( Collectors.toCollection(ArrayList::new) );
-        }
-
-        private final ConcurrentHashMap< UUID, ContactData              > contacts    = new ConcurrentHashMap<>();
-        private final ConcurrentHashMap< UUID, ConcurrentConferenceData > conferences = new ConcurrentHashMap<>();
-        private final ConcurrentHashMap< UUID, Controller               > controllers = new ConcurrentHashMap<>();
-        private final ConcurrentHashMap< UUID, FileData                 > files       = new ConcurrentHashMap<>();
-    }
-
-    public ResultData
-    registerContact(
-        Task     task,
-        Controller controller
+    Model(
+        IBase base
     )
     {
+        this.base = base;
+    }
+
+    @Override
+    public ResultData
+    registerContact(
+        Task        task,
+        IController controller
+    )
+    {
+        if ( !base.isRunning() ) {
+            return new ResultData( ResultTypes.Disconnected, null );
+        }
+
         if ( !(task.operation.data instanceof String) ) {
             errorLog( "invalid data in command register contact" );
             return null;
@@ -177,25 +50,32 @@ public class Model
         return new ResultData( ResultTypes.ContactID, id );
     }
 
-    public boolean
+    @Override
+    public ResultData
     disconnect(
         UUID              myID,
         ArrayList< UUID > myConferences
     )
     {
-        if ( base.removeController(myID) == null ) {
-            errorLog( "disconnecting not existing controller in command disconnect" );
-            return false;
+        if ( !base.isRunning() ) {
+            return new ResultData( ResultTypes.Disconnected, null );
         }
+
+        IController controller = base.removeController(myID);
+        if ( controller == null ) {
+            errorLog( "disconnecting not existing controller in command disconnect" );
+            return null;
+        }
+        controller.stop();
 
         if ( base.removeContact(myID) == null ) {
             errorLog( "disconnecting not existing contact in command disconnect" );
-            return false;
+            return null;
         }
 
         deleteMyConferences( myID, myConferences );
 
-        return true;
+        return new ResultData( ResultTypes.Disconnected, null );
     }
 
     private void
@@ -231,12 +111,18 @@ public class Model
         myConferences.clear();
     }
 
+    @Override
     public ResultData
     refreshContacts()
     {
+        if ( !base.isRunning() ) {
+            return new ResultData( ResultTypes.Disconnected, null );
+        }
+
         return new ResultData( ResultTypes.UpdatedContacts, base.getContacts() );
     }
 
+    @Override
     public ResultData
     createConference(
         Task              task,
@@ -244,6 +130,10 @@ public class Model
         ArrayList< UUID > myConferences
     )
     {
+        if ( !base.isRunning() ) {
+            return new ResultData( ResultTypes.Disconnected, null );
+        }
+
         ResultData result = null;
 
         if ( task.source == Sources.Client ) {
@@ -284,7 +174,7 @@ public class Model
         }
         else if ( task.source == Sources.Server ) {
             if ( !(task.operation.data instanceof Conference) ) {
-                errorLog( "invalid data in command create conference from Server" );
+                errorLog( "invalid data in command create conference from SocketConnection" );
                 return null;
             }
 
@@ -299,6 +189,7 @@ public class Model
         return result;
     }
 
+    @Override
     public ResultData
     addToConference(
         Task              task,
@@ -306,6 +197,10 @@ public class Model
         ArrayList< UUID > myConferences
     )
     {
+        if ( !base.isRunning() ) {
+            return new ResultData( ResultTypes.Disconnected, null );
+        }
+
         ResultData result = null;
 
         if ( task.source == Sources.Client ) {
@@ -356,7 +251,7 @@ public class Model
             }
 
             if ( entry.contact.equals(myID) ) {
-                if ( !myConferences.add( entry.conference.id ) ) {
+                if ( !myConferences.add(entry.conference.id) ) {
                     errorLog( "add to conference from server: client is already in conference" );
                 }
                 result = new ResultData( ResultTypes.AddedConference, entry.conference );
@@ -370,6 +265,7 @@ public class Model
         return result;
     }
 
+    @Override
     public ResultData
     removeFromConference(
         Task              task,
@@ -377,6 +273,10 @@ public class Model
         ArrayList< UUID > myConferences
     )
     {
+        if ( !base.isRunning() ) {
+            return new ResultData( ResultTypes.Disconnected, null );
+        }
+
         if ( !(task.operation.data instanceof ContactConfPair) ) {
             errorLog( "invalid data in command remove from conference" );
             return null;
@@ -427,6 +327,7 @@ public class Model
         return new ResultData( ResultTypes.RemovedFromConference, remove );
     }
 
+    @Override
     public ResultData
     deleteConference(
         Task              task,
@@ -434,6 +335,10 @@ public class Model
         ArrayList< UUID > myConferences
     )
     {
+        if ( !base.isRunning() ) {
+            return new ResultData( ResultTypes.Disconnected, null );
+        }
+
         if ( !(task.operation.data instanceof UUID) ) {
             errorLog( "invalid data in command delete conference" );
             return null;
@@ -465,6 +370,7 @@ public class Model
         return new ResultData( ResultTypes.DeletedConference, conferenceID );
     }
 
+    @Override
     public ResultData
     sendMessageToConference(
         Task              task,
@@ -472,6 +378,10 @@ public class Model
         ArrayList< UUID > myConferences
     )
     {
+        if ( !base.isRunning() ) {
+            return new ResultData( ResultTypes.Disconnected, null );
+        }
+
         if ( !(task.operation.data instanceof ContactConfMessage) ) {
             errorLog( "invalid data in command send text to conference" );
             return null;
@@ -503,12 +413,17 @@ public class Model
         return new ResultData( ResultTypes.MessageToConference, message );
     }
 
+    @Override
     public ResultData
     sendMessageToContact(
         Task task,
         UUID myID
     )
     {
+        if ( !base.isRunning() ) {
+            return new ResultData( ResultTypes.Disconnected, null );
+        }
+
         if ( !(task.operation.data instanceof ContactMessagePair) ) {
             errorLog( "invalid data in command send text to contact" );
             return null;
@@ -521,7 +436,7 @@ public class Model
         }
 
         if ( task.source == Task.Sources.Client ) {
-            Controller controller = base.getController( message.contact );
+            IController controller = base.getController( message.contact );
             if ( controller == null ) {
                 errorLog( "contact is null" );
                 return null;
@@ -545,9 +460,9 @@ public class Model
         }
 
         for ( UUID contact : conference.members ) {
-            Controller controller = base.getController( contact );
+            IController controller = base.getController( contact );
             if ( controller == null ) {
-                errorLog( "controller on id" + contact.toString() + " is null" );
+                errorLog( "controllerThread on id" + contact.toString() + " is null" );
                 continue;
             }
 
@@ -571,7 +486,7 @@ public class Model
                 continue;
             }
 
-            Controller controller = base.getController( contact );
+            IController controller = base.getController( contact );
             if ( controller == null ) {
                 errorLog( "receiver on id" + contact.toString() + " is null" );
                 continue;
@@ -581,17 +496,27 @@ public class Model
         }
     }
 
+    @Override
     public ResultData
     refreshStorage()
     {
+        if ( !base.isRunning() ) {
+            return new ResultData( ResultTypes.Disconnected, null );
+        }
+
         return new ResultData( ResultTypes.UpdatedFiles, base.getFiles() );
     }
 
+    @Override
     public ResultData
     uploadFile(
         Task task
     )
     {
+        if ( !base.isRunning() ) {
+            return new ResultData( ResultTypes.Disconnected, null );
+        }
+
         if ( !(task.operation.data instanceof FileData) ) {
             errorLog( "invalid data in command upload file" );
             return null;
@@ -613,11 +538,16 @@ public class Model
         return new ResultData( ResultTypes.UploadedFile, id );
     }
 
+    @Override
     public ResultData
     downloadFile(
         Task task
     )
     {
+        if ( !base.isRunning() ) {
+            return new ResultData( ResultTypes.Disconnected, null );
+        }
+
         if ( !(task.operation.data instanceof UUID) ) {
             errorLog( "invalid data in command download file" );
             return null;
@@ -634,11 +564,16 @@ public class Model
         return new ResultData( ResultTypes.DownloadedFile, new File(id, fileData) );
     }
 
+    @Override
     public ResultData
     removeFile(
         Task task
     )
     {
+        if ( !base.isRunning() ) {
+            return new ResultData( ResultTypes.Disconnected, null );
+        }
+
         if ( !(task.operation.data instanceof UUID) ) {
             errorLog( "invalid data in command upload file" );
             return null;
@@ -651,16 +586,6 @@ public class Model
         }
 
         return new ResultData( ResultTypes.RemovedFile, id );
-    }
-
-    public void
-    release()
-    {
-        running = false;
-
-        for ( Controller controller : base.controllers.values() ) {
-            controller.addTask( new Task(Sources.Server, Commands.Disconnect, null) );
-        }
     }
 
     private void
@@ -685,6 +610,5 @@ public class Model
         }
     }
 
-    private boolean running;
-    private final Base base = new Base();
+    private final IBase base;
 }

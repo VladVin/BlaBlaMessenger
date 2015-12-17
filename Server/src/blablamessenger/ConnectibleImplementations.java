@@ -1,6 +1,6 @@
 package blablamessenger;
 
-public enum BaseImplementations
+public enum ConnectibleImplementations
 {
     Default
 }
