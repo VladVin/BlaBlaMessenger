@@ -7,11 +7,17 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public interface IController
 {
     void
-    createController(
-        IConnectible                        listener,
+    start(
+        ICommunicable                       listener,
         ConcurrentLinkedQueue< Task       > tasks,
         ConcurrentLinkedQueue< ResultData > results
     );
+
     void
-    destroyController();
+    stop();
+
+    boolean
+    addTask(
+        Task task
+    );
 }

@@ -5,6 +5,7 @@ import java.io.Serializable;
 public enum ResultTypes implements Serializable
 {
     ContactID,
+    Disconnected,
     UpdatedContacts,
     CreatedConference,
     AddedToNewConference,

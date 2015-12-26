@@ -1,87 +1,189 @@
-@startuml
+public interface IBase
+{
+    ContactData
+    addContact(
+        UUID id,
+        ContactData contact
+    );
 
-interface IClientView {
-    void sendCommand(CommandData command);
-    void onResultReceived(ResultData result);
+    ContactData
+    removeContact(
+        UUID contactID
+    );
+
+    ArrayList< Contact >
+    getContacts();
+
+    ConcurrentConferenceData
+    addConference(
+        UUID                     id,
+        ConcurrentConferenceData conference
+    );
+
+    ConcurrentConferenceData
+    removeConference(
+        UUID conferenceID
+    );
+
+    ConcurrentConferenceData
+    getConference(
+        UUID conferenceID
+    );
+
+    IController
+    addController(
+        UUID        id,
+        IController controller
+    );
+
+    IController
+    removeController(
+        UUID controllerID
+    );
+
+    IController
+    getController(
+        UUID controllerID
+    );
+
+    void
+    upload(
+        UUID     id,
+        FileData fileData
+    );
+
+    FileData
+    download(
+        UUID id
+    );
+
+    FileData
+    removeFile(
+        UUID id
+    );
+
+    ArrayList<File>
+    getFiles();
+
+    boolean
+    isRunning();
+
+    void
+    close();
 }
 
-interface IClientController {
-    void registerMe();
-    void sendUserMessage(String message, ContactId contactId);
-    void sendConferenceMessage(String message, ConferenceId);
-    void sendFile(Bitmap image);
-    void sendFile(java.io.File file);
+public interface ICommunicable
+{
+    void
+    subscribe();
 
-    void onResultReceived(ResultData result);
+    void
+    unsubscribe();
 }
 
-interface IClientModel {
-    void registerMe();
-    void sendUserMessage(String message, ContactId contactId);
-    void sendConferenceMessage(String message, ConferenceId);
-    void sendFile(Bitmap image);
-    void sendFile(java.io.File file);
+public interface IConnectible
+{
+    void
+    connect(
+        int port
+    );
 
-    void updateContacts(List<Contact> contacts);
-    void processNewUserMessage(ContactMessagePair message);
-    void processNewConferenceMessage(ContactConfMessagePair message);
-    void updateFilesList(List<FileIdNamePair> filesInfo);
-    void processReceivedFile(File file);
+    void
+    disconnect();
 }
 
-interface IUserController {
-    void onTouchListener();
-    void onRegisterBtnClickListener();
-    void onSendMessageListener();
+public interface IController
+{
+    void
+    start(
+        ICommunicable                       listener,
+        ConcurrentLinkedQueue< Task       > tasks,
+        ConcurrentLinkedQueue< ResultData > results
+    );
 
-    void updateContactList(List<Contact> contacts);
-    void updateMessageList(List<ConfMessagePair> messages);
-    void updateFilesList(List<FileIdNamePair> filesInfo);
-    void showFile(File file);
+    void
+    stop();
+
+    boolean
+    addTask(
+        Task task
+    );
 }
 
-interface IUserView {
+public interface IModel
+{
+    ResultData
+    registerContact(
+        Task     task,
+        IController controller
+    );
 
+    ResultData
+    disconnect(
+        UUID myID,
+        ArrayList< UUID > myConferences
+    );
+
+    ResultData
+    refreshContacts();
+
+    ResultData
+    createConference(
+        Task              task,
+        UUID              myID,
+        ArrayList< UUID > myConferences
+    );
+
+    ResultData
+    addToConference(
+        Task              task,
+        UUID              myID,
+        ArrayList< UUID > myConferences
+    );
+
+    ResultData
+    removeFromConference(
+        Task              task,
+        UUID              myID,
+        ArrayList< UUID > myConferences
+    );
+
+    ResultData
+    deleteConference(
+        Task              task,
+        UUID              myID,
+        ArrayList< UUID > myConferences
+    );
+
+    ResultData
+    sendMessageToConference(
+        Task              task,
+        UUID              myID,
+        ArrayList< UUID > myConferences
+    );
+
+    ResultData
+    sendMessageToContact(
+        Task task,
+        UUID myID
+    );
+
+    ResultData
+    refreshStorage();
+
+    ResultData
+    uploadFile(
+        Task task
+    );
+
+    ResultData
+    downloadFile(
+        Task task
+    );
+
+    ResultData
+    removeFile(
+        Task task
+    );
 }
 
-class ClientDataTransfer implements IClientView {
-    void sendCommand(CommandData command);
-    void onResultReceived(ResultData result);
-}
-
-class ClientController implements IClientController {
-    void registerMe();
-    void sendUserMessage(String message, ContactId contactId);
-    void sendConferenceMessage(String message, ConferenceId);
-    void sendFile(Bitmap image);
-    void sendFile(java.io.File file);
-
-    void onResultReceived(ResultData result);
-}
-
-class ClientModel implements IClientModel {
-    void registerMe();
-    void sendUserMessage(String message, ContactId contactId);
-    void sendConferenceMessage(String message, ConferenceId);
-    void sendFile(Bitmap image);
-    void sendFile(java.io.File file);
-
-    void updateContacts(List<Contact> contacts);
-    void processNewUserMessage(ContactMessagePair message);
-    void processNewConferenceMessage(ContactConfMessagePair message);
-    void updateFilesList(List<FileIdNamePair> filesInfo);
-    void processReceivedFile(File file);
-}
-
-class UserController implements IUserController {
-    void onTouchListener();
-    void onRegisterBtnClickListener();
-    void onSendMessageListener();
-
-    void updateContactList(List<Contact> contacts);
-    void updateMessageList(List<ConfMessagePair> messages);
-    void updateFilesList(List<FileIdNamePair> filesInfo);
-    void showFile(File file);
-}
-
-@enduml
