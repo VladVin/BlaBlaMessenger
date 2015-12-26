@@ -107,7 +107,7 @@ public class SocketConnection implements IConnectible
 
         private void
         addLog(
-                String log
+            String log
         )
         {
             System.out.println( SocketConnection.class.getName() + ": " + log );
