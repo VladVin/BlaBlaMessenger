@@ -35,7 +35,7 @@ public class Task
         this.operation = new CommandData( operation, data );
     }
 
-    public coreutilities.Commands
+    public Commands
     getCommand()
     {
         if ( operation == null ) {
