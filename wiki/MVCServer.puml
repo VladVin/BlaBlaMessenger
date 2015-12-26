@@ -1,26 +1,53 @@
 @startuml
 
-abstract class AbstractList
-abstract AbstractCollection
-interface List
-interface Collection
-
-List <|-- AbstractList
-Collection <|-- AbstractCollection
-
-Collection <|- List
-AbstractCollection <|- AbstractList
-AbstractList <|-- ArrayList
-
-class ArrayList {
-Object[] elementData
-size()
+interface IBase {
+    ContactData addContact(UUID id, ContactData contact);
+    ContactData removeContact(UUID contactID);
+    ArrayList< Contact > getContacts();
+    ConcurrentConferenceData addConference(UUID id, ConcurrentConferenceData conference);
+    ConcurrentConferenceData removeConference(UUID conferenceID);
+    ConcurrentConferenceData getConference(UUID conferenceID);
+    IController addController(UUID id, IController controller);
+    IController removeController(UUID controllerID);
+    IController getController(UUID controllerID);
+    void upload(UUID id, FileData fileData);
+    FileData download(UUID id);
+    FileData removeFile(UUID id);
+    ArrayList<File> getFiles();
+    boolean isRunning();
+    void close();
 }
 
-enum TimeUnit {
-DAYS
-HOURS
-MINUTES
+interface ICommunicable {
+    void subscribe();
+    void unsubscribe();
+}
+
+interface IConnectible {
+    void connect(int port);
+    void disconnect();
+}
+
+interface IController {
+    void start(ICommunicable listener, ConcurrentLinkedQueue<Task> tasks, ConcurrentLinkedQueue<ResultData> results);
+    void stop();
+    boolean addTask(Task task);
+}
+
+interface IModel {
+    ResultData registerContact(Task task, IController controller);
+    ResultData disconnect(UUID myID, ArrayList< UUID > myConferences);
+    ResultData refreshContacts();
+    ResultData createConference(Task task, UUID myID, ArrayList< UUID > myConferences);
+    ResultData addToConference(Task task, UUID myID, ArrayList< UUID > myConferences);
+    ResultData removeFromConference(Task task, UUID myID, ArrayList< UUID > myConferences);
+    ResultData deleteConference(Task task, UUID myID, ArrayList< UUID > myConferences);
+    ResultData sendMessageToConference(Task task, UUID myID, ArrayList< UUID > myConferences);
+    ResultData sendMessageToContact(Task task, UUID myID);
+    ResultData refreshStorage();
+    ResultData uploadFile(Task task);
+    ResultData downloadFile(Task task);
+    ResultData removeFile(Task task);
 }
 
 @enduml
