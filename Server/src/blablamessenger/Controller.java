@@ -24,6 +24,7 @@ public class Controller implements IController
     )
     {
         this.controllerThread = new ControllerThread( listener, tasks, results );
+        this.controllerThread.start();
     }
 
     @Override
