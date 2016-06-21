@@ -8,7 +8,7 @@ import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import data_structures.ResultData;
+import coreutilities.ResultData;
 
 /**
  * Created by VladVin on 11.05.2015.

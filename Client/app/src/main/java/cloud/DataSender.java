@@ -9,7 +9,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
-import data_structures.*;
+import coreutilities.CommandData;
 
 /**
  * Created by VladVin on 05.05.2015.

@@ -9,9 +9,8 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-import data_structures.ContactMessagePair;
-import data_structures.File;
-import data_structures.FileIdNamePair;
+
+import coreutilities.FileIdNamePair;
 import java_laba.blablamessengerclient.ConversationContactsPair;
 import java_laba.blablamessengerclient.R;
 

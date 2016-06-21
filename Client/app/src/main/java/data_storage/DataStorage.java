@@ -3,23 +3,24 @@ package data_storage;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Queue;
+import java.util.UUID;
 import java.util.concurrent.LinkedBlockingDeque;
 
-import data_structures.ContactId;
-import data_structures.ContactMessagePair;
-import data_structures.Contacts;
-import data_structures.FileIdNamePair;
-import data_structures.FileIdNamePairs;
-import data_structures.ResultData;
-import data_structures.ResultTypes;
+import coreutilities.Contact;
+import coreutilities.ContactMessagePair;
+import coreutilities.FileIdNamePair;
+import coreutilities.ResultData;
+import coreutilities.ResultTypes;
+
 
 /**
  * Created by VladVin on 11.05.2015.
  */
 public class DataStorage {
-    private ContactId contactId;
-    private Contacts contacts;
+    private UUID contactId;
+    private HashMap<UUID, Contact> contacts;
     private ArrayList<ContactMessagePair> messages;
     private ArrayList<FileIdNamePair> files;
 
@@ -35,44 +36,44 @@ public class DataStorage {
 
     public void pushData(ResultData resData) {
         // TODO: Throw the exception when unknown result type
-        switch (resData.Type)
+        switch (resData.type)
         {
-            case ContactId:
-                contactId = (ContactId)resData.Data;
-                addWhatUpdate(ResultTypes.ContactId);
-                Log.d("DataStorage", "ContactId received");
+            case ContactID:
+                contactId = (UUID)resData.data;
+                addWhatUpdate(ResultTypes.ContactID);
+                Log.d("DataStorage", "UUID received");
                 break;
             case UpdatedContacts:
-                contacts = (Contacts)resData.Data;
+                contacts = (HashMap<UUID, Contact>)resData.data;
                 addWhatUpdate(ResultTypes.UpdatedContacts);
                 Log.d("DataStorage", "Contacts received");
                 break;
-            case Message:
-                ContactMessagePair mes = (ContactMessagePair)resData.Data;
-                messages.add(new ContactMessagePair(mes.Contact, mes.Message));
-                addWhatUpdate(ResultTypes.Message);
+            case MessageToContact:
+                ContactMessagePair mes = (ContactMessagePair)resData.data;
+                messages.add(new ContactMessagePair(mes.contact, mes.text));
+                addWhatUpdate(ResultTypes.MessageToContact);
                 Log.d("DataStorage", "Message received");
                 break;
-            case UpdatedFiles:
-                files = ((FileIdNamePairs)resData.Data).Pairs;
-                addWhatUpdate(ResultTypes.UpdatedFiles);
-                Log.d("DataStorage", "Files list received");
-                break;
+//            case UpdatedFiles:
+//                files = ((FileIdNamePairs)resData.data).Pairs;
+//                addWhatUpdate(ResultTypes.UpdatedFiles);
+//                Log.d("DataStorage", "Files list received");
+//                break;
         }
     }
 
-    public Contacts getContacts() {
+    public HashMap<UUID, Contact> getContacts() {
         whatUpdated.remove(ResultTypes.UpdatedContacts);
         return contacts;
     }
 
-    public ContactId getContactId() {
-        whatUpdated.remove(ResultTypes.ContactId);
+    public UUID getUUID() {
+        whatUpdated.remove(ResultTypes.ContactID);
         return contactId;
     }
 
     public ArrayList<ContactMessagePair> getMessages() {
-        whatUpdated.remove(ResultTypes.Message);
+        whatUpdated.remove(ResultTypes.MessageToContact);
         return messages;
     }
 

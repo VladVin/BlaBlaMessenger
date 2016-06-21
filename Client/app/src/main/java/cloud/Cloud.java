@@ -4,10 +4,9 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import coreutilities.CommandData;
+import coreutilities.ResultData;
 import data_storage.DataStorage;
-import data_structures.CommandData;
-import data_structures.Commands;
-import data_structures.ResultData;
 
 /**
  * Created by VladVin on 11.05.2015.
@@ -32,15 +31,9 @@ public class Cloud extends Thread {
     public void run() {
         running = true;
 
-        while (running && (dataSender == null || dataReceiver == null));
-        if (dataSender != null && dataReceiver != null) {
-            dataSender.start();
-            dataReceiver.start();
-        }
-        else
-        {
-            // TODO: Do something
-        }
+        while (dataSender == null || dataReceiver == null);
+        dataSender.start();
+        dataReceiver.start();
 
         while(running) {
             try {
